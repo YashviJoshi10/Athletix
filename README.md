@@ -36,13 +36,14 @@
 
 ## 🛠️ Tech Stack
 
-| Technology  | Purpose  |
-|-------------|---------|
-| **Flutter**  | Frontend development (Android Studio, Project IDX) |
-| **Firebase**  | Authentication, Firestore database, Storage |
-| **Gemini API**  | AI-powered recommendations |
-| **Node.js**  | Backend server for API security |
-| **JavaScript**  | Backend scripting and logic |
+| Technology     | Purpose                                            |
+|----------------|----------------------------------------------------|
+| **Flutter**    | Frontend development (Android Studio, Project IDX) |
+| **Firebase**   | Authentication, Firestore database, Storage        |
+| **Gemini API** | AI-powered recommendations                         |
+| **Node.js**    | Backend server for API security                    |
+| **JavaScript** | Backend scripting and logic                        |
+| **Vercel**     | Hosting                                            |
 
 ## 🚀 Getting Started
 
@@ -70,9 +71,10 @@
 This project uses Firebase services. To set up Firebase for development:
 
 1. **Go to [Firebase Console](https://console.firebase.google.com/)** and create a project.
-2. **Download** the `google-services.json` file.
-3. Place it inside the `android/app/` directory.
-4. Ensure the file is listed in `.gitignore` to prevent exposing credentials.
+2. Select **Android App** in Firebase Project.
+3. **Download** the `google-services.json` file.
+4. Place it inside the `android/app/` directory.
+5. Ensure the file is listed in `.gitignore` to prevent exposing credentials.
 
 ### 📌 Future Enhancements
 

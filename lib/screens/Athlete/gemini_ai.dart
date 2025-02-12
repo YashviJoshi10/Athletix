@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';  // Required for Firestore
-import 'package:firebase_auth/firebase_auth.dart';      // Required for Firebase Authentication (if needed)
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -86,6 +85,7 @@ class _GeminiAIPageState extends State<GeminiAIPage> {
       'injury_descriptions': widget.descriptions,
       'ai_response': aiResponse,
       'timestamp': FieldValue.serverTimestamp(),
+      'userId': FirebaseAuth.instance.currentUser?.uid,
     };
 
     await FirebaseFirestore.instance

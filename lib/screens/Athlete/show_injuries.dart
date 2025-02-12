@@ -47,7 +47,6 @@ class _ShowInjuryPageState extends State<ShowInjuryPage> {
   }
 
   // Show dialog asking if user wants AI recommendations
-  // Show dialog asking if user wants AI recommendations
   void _showAIRecommendationDialog() {
     showDialog(
       context: context,

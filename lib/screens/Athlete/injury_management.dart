@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_injury_page.dart';
 import 'show_injuries.dart'; // Import ShowInjuryPage
+import 'ai_responses.dart'; // Import AIResponsesPage
 
 class InjuryManagementPage extends StatefulWidget {
   const InjuryManagementPage({super.key});
@@ -76,6 +77,26 @@ class _InjuryManagementPageState extends State<InjuryManagementPage> {
               child: const Text("Add Injury", style: TextStyle(fontSize: 18)),
             ),
             const SizedBox(height: 20),
+
+            // Button to go to AI Responses page
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AIResponsesPage(),  // Navigate to AIResponsesPage
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              ),
+              child: const Text("Get Previous AI Responses", style: TextStyle(fontSize: 18)),
+            ),
+
+            const SizedBox(height: 20),
+
             FutureBuilder<List<Map<String, dynamic>>>(  // FutureBuilder to fetch and display injuries
               future: _fetchInjuries(),
               builder: (context, snapshot) {

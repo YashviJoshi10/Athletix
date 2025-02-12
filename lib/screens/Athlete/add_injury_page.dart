@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'gemini_ai.dart'; // Import Gemini AI page to redirect for recommendations
+import 'show_injuries.dart';
 
 class AddInjuryPage extends StatefulWidget {
   const AddInjuryPage({super.key});
@@ -38,6 +38,8 @@ class _AddInjuryPageState extends State<AddInjuryPage> {
   }
 
   // Function to save injuries to Firestore and create notifications for connected doctors
+  // Updated _saveInjuries function in AddInjuryPage
+
   Future<void> _saveInjuries() async {
     if (_injuryDateController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -56,7 +58,7 @@ class _AddInjuryPageState extends State<AddInjuryPage> {
 
     String injuryDate = _injuryDateController.text;
     Map<String, dynamic> injuryData = {
-      "userId": _userUid,  // Store the user's UID with the injury data
+      "userId": _userUid, // Store the user's UID with the injury data
       "injuryDate": injuryDate, // Store the injury date
     };
 
@@ -114,72 +116,25 @@ class _AddInjuryPageState extends State<AddInjuryPage> {
         const SnackBar(content: Text("Injuries saved successfully!")),
       );
 
-      // Show the dialog to ask if the user wants AI recommendations
-      _showAIRecommendationDialog();
-
       // Clear fields after saving
       _injuryDateController.clear();
       setState(() {
         _injuryDescriptionList.clear();
         _addInjuryField();
       });
+
+      // After saving, navigate directly to ShowInjuryPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ShowInjuryPage(injuryDate: injuryDate),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter at least one injury description")),
       );
     }
-  }
-
-  // Show dialog asking if user wants AI recommendations
-  void _showAIRecommendationDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("AI Recommendations"),
-          content: const Text("Would you like to see some AI recommendations for your injuries?"),
-          actions: [
-            TextButton(
-              child: const Text("No"),
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-            ),
-            TextButton(
-              child: const Text("Yes"),
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-
-                // Collect descriptions **before navigating**
-                List<String> descriptions = _injuryDescriptionList
-                    .where((controller) => controller.text.isNotEmpty)
-                    .map((controller) => controller.text)
-                    .toList();
-
-                // Log the descriptions to check if they are valid
-                print("Descriptions: $descriptions");
-
-                // Ensure there are valid descriptions before proceeding
-                if (descriptions.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Please enter valid injury descriptions")),
-                  );
-                  return;
-                }
-
-                // Navigate to Gemini AI page with the descriptions
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GeminiAIPage(descriptions: descriptions),
-                  ),
-                );
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   // Fetch the user's name from the users collection

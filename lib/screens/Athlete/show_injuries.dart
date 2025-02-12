@@ -53,7 +53,7 @@ class _ShowInjuryPageState extends State<ShowInjuryPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("AI Recommendations"),
+          title: const Text("Get AI Recommendations"),
           content: const Text("Would you like to see some AI recommendations for your injury?"),
           actions: [
             TextButton(

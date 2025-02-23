@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../Common/NotificationsPage.dart'; // Import the NotificationsPage
+import '../Common/notifications_page.dart'; // Import the NotificationsPage
 import '../Common/drawer_menu.dart'; // Import the DrawerMenu
 import '../Common/message.dart';
 
-class PsychologistDashboardPage extends StatelessWidget {
+class DietitianDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Psychologist Dashboard'),
+        title: Text('Dietitian Dashboard'),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -47,7 +47,7 @@ class PsychologistDashboardPage extends StatelessWidget {
       drawer: DrawerMenu(), // Add the DrawerMenu to the scaffold
       body: Center(
         child: Text(
-          'Welcome, Psychologist!',
+          'Welcome, Dietitian!',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'EmailVerificationPage.dart';
+import 'email_verification_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 import 'package:intl/intl.dart';
@@ -67,7 +67,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'email': _emailController.text.trim(),
       };
 
-      // Add profession-specific fields
       if (_selectedProfession == 'Athlete' || _selectedProfession == 'Coach') {
         userData['sport'] = _selectedSport;
       } else if (_selectedProfession == 'Doctor') {
@@ -75,7 +74,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
 
       await FirebaseFirestore.instance.collection('users').doc(uid).set(userData);
-
       await userCredential.user!.sendEmailVerification();
 
       Navigator.pushReplacement(

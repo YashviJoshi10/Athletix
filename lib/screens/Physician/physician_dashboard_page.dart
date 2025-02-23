@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../Common/drawer_menu.dart'; // Import the DrawerMenu
 import '../Common/message.dart'; // Import the MessagePage
-import '../Common/NotificationsPage.dart';
+import '../Common/notifications_page.dart';
 
 class PhysicianDashboardPage extends StatelessWidget {
   @override

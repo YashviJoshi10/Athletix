@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Common/NotificationsPage.dart'; // Import the NotificationsPage
+import '../Common/notifications_page.dart'; // Import the NotificationsPage
 import '../Common/drawer_menu.dart'; // Import the DrawerMenu
 import '../Common/message.dart';
 

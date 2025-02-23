@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'DoctorProfile.dart';
+import 'doctor_profile.dart';
 
 class ShowDoctorsPage extends StatefulWidget {
   final String profession;

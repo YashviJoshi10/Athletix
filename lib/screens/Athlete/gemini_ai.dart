@@ -14,7 +14,6 @@ class GeminiAIPage extends StatefulWidget {
 }
 
 class _GeminiAIPageState extends State<GeminiAIPage> {
-  final TextEditingController _controller = TextEditingController();
   List<Map<String, String>> _messages = [];
   bool _loading = false;
 

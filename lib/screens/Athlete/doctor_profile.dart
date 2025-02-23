@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 
 class DoctorProfilePage extends StatefulWidget {
   final String doctorId;
-  final String userId;  // Add userId to the constructor
+  final String userId;
 
-  DoctorProfilePage({required this.doctorId, required this.userId});
+  const DoctorProfilePage({Key? key, required this.doctorId, required this.userId}) : super(key: key);
 
   @override
-  _DoctorProfilePageState createState() => _DoctorProfilePageState();
+  DoctorProfilePageState createState() => DoctorProfilePageState();
 }
 
-class _DoctorProfilePageState extends State<DoctorProfilePage> {
+class DoctorProfilePageState extends State<DoctorProfilePage> {
   Map<String, dynamic>? _doctorDetails;
   bool _isLoading = true;
-  String? _connectionStatus; // Track the connection status
+  String? _connectionStatus;
 
   Future<void> _fetchDoctorDetails() async {
     try {
@@ -32,17 +32,16 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         setState(() {
           _isLoading = false;
         });
-        print("Doctor not found");
+        debugPrint("Doctor not found");
       }
     } catch (e) {
-      print("Error fetching doctor details: $e");
+      debugPrint("Error fetching doctor details: $e");
       setState(() {
         _isLoading = false;
       });
     }
   }
 
-  // Check if a connection request already exists for this user and doctor
   Future<void> _checkConnectionStatus() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -53,7 +52,7 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
 
       if (querySnapshot.docs.isEmpty) {
         setState(() {
-          _connectionStatus = null; // No request, so show Connect button
+          _connectionStatus = null;
         });
       } else {
         DocumentSnapshot existingRequest = querySnapshot.docs.first;
@@ -64,19 +63,17 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
         });
       }
     } catch (e) {
-      print("Error checking connection status: $e");
+      debugPrint("Error checking connection status: $e");
     }
   }
 
-  // Handle sending or updating the connection request
   Future<void> _handleConnectionRequest() async {
     try {
       if (_connectionStatus == null) {
-        // No existing request, send a new one
         await FirebaseFirestore.instance.collection('connections').add({
           'doctorId': widget.doctorId,
           'userId': widget.userId,
-          'status': 'pending', // status is 'pending' initially
+          'status': 'pending',
           'timestamp': FieldValue.serverTimestamp(),
         });
 
@@ -84,11 +81,12 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
           _connectionStatus = 'pending';
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Connection request sent to the doctor!')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Connection request sent to the doctor!')),
+          );
+        }
       } else {
-        // Handle different statuses
         DocumentSnapshot existingRequest = (await FirebaseFirestore.instance
             .collection('connections')
             .where('doctorId', isEqualTo: widget.doctorId)
@@ -98,17 +96,17 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
             .first;
 
         if (_connectionStatus == 'pending') {
-          // If the request is pending, update to 'pending'
           await FirebaseFirestore.instance
               .collection('connections')
               .doc(existingRequest.id)
               .update({'status': 'pending'});
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Connection request is pending!')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Connection request is pending!')),
+            );
+          }
         } else if (_connectionStatus == 'accepted') {
-          // If the request is accepted, change status to 'connected'
           await FirebaseFirestore.instance
               .collection('connections')
               .doc(existingRequest.id)
@@ -118,16 +116,20 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
             _connectionStatus = 'connected';
           });
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('You are now connected to the doctor!')),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('You are now connected to the doctor!')),
+            );
+          }
         }
       }
     } catch (e) {
-      print("Error handling connection request: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to handle connection request.')),
-      );
+      debugPrint("Error handling connection request: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to handle connection request.')),
+        );
+      }
     }
   }
 
@@ -135,40 +137,40 @@ class _DoctorProfilePageState extends State<DoctorProfilePage> {
   void initState() {
     super.initState();
     _fetchDoctorDetails();
-    _checkConnectionStatus(); // Check connection status when the page loads
+    _checkConnectionStatus();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Doctor Profile'),
+        title: const Text('Doctor Profile'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : _doctorDetails == null
-            ? Center(child: Text("No doctor details available."))
+            ? const Center(child: Text("No doctor details available."))
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               _doctorDetails!['name'],
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "Specialization: ${_doctorDetails!['specialization']}",
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "Contact: ${_doctorDetails!['phone']}",
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _handleConnectionRequest,
               child: Text(

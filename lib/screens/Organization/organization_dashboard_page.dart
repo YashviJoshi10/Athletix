@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import '../Common/drawer_menu.dart'; // Import the DrawerMenu
 import '../Common/message.dart'; // Import the MessagePage
-import '../Common/NotificationsPage.dart';
+import '../Common/notifications_page.dart';
 
-class CoachDashboardPage extends StatelessWidget {
-  const CoachDashboardPage({Key? key}) : super(key: key);
+class OrganizationDashboardPage extends StatelessWidget {
+  const OrganizationDashboardPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Coach Dashboard'),
+        title: Text('Organization Dashboard'),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -51,31 +51,31 @@ class CoachDashboardPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Welcome, Coach!',
+              'Welcome, Organization!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
             // Example sections
             ListTile(
-              leading: Icon(Icons.group),
-              title: Text('Team Management'),
-              subtitle: Text('Manage your team members and schedules.'),
+              leading: Icon(Icons.sports),
+              title: Text('Athlete Management'),
+              subtitle: Text('Monitor and manage athletes under your banner.'),
               onTap: () {
                 // Add functionality
               },
             ),
             ListTile(
-              leading: Icon(Icons.analytics),
-              title: Text('Performance Analytics'),
-              subtitle: Text('Analyze player performances and insights.'),
+              leading: Icon(Icons.event),
+              title: Text('Event Management'),
+              subtitle: Text('Plan and organize sports events.'),
               onTap: () {
                 // Add functionality
               },
             ),
             ListTile(
-              leading: Icon(Icons.school),
-              title: Text('Training Programs'),
-              subtitle: Text('Plan and organize training sessions.'),
+              leading: Icon(Icons.monetization_on),
+              title: Text('Sponsorship Deals'),
+              subtitle: Text('Handle sponsorships and finances.'),
               onTap: () {
                 // Add functionality
               },

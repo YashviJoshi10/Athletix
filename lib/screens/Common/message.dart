@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'ChatScreen.dart';
+import 'chat_screen.dart';
 
 class MessageScreen extends StatefulWidget {
   @override
@@ -53,13 +53,13 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 
   // Fetch all users from Firestore
+  // Fetch all users from Firestore
   Future<void> _fetchAllUsers() async {
     try {
-      var querySnapshot =
-      await FirebaseFirestore.instance.collection('users').get();
+      var querySnapshot = await FirebaseFirestore.instance.collection('users').get();
       setState(() {
         allUsers = querySnapshot.docs.map((doc) {
-          var data = doc.data() as Map<String, dynamic>;
+          var data = doc.data(); // Removed unnecessary cast
           data['userId'] = doc.id; // Ensure userId is correctly assigned
           return data;
         }).toList();
@@ -69,7 +69,7 @@ class _MessageScreenState extends State<MessageScreen> {
     }
   }
 
-  // Fetch recent chats for the logged-in user
+// Fetch recent chats for the logged-in user
   Future<void> _fetchRecentChats() async {
     try {
       var querySnapshot = await FirebaseFirestore.instance
@@ -81,7 +81,7 @@ class _MessageScreenState extends State<MessageScreen> {
 
       List<Map<String, dynamic>> recentUsers = [];
       querySnapshot.docs.forEach((doc) {
-        var data = doc.data() as Map<String, dynamic>;
+        var data = doc.data(); // Removed unnecessary cast
         var participants = data['participants'] as List<dynamic>;
 
         // Find the other user ID (not the logged-in user)

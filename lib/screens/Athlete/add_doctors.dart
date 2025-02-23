@@ -1,20 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'show_doctors.dart'; // Import the ShowDoctorsPage
+import 'show_doctors.dart'; // Ensure ShowDoctorsPage is public (without an underscore)
 
 class AddDoctorsPage extends StatefulWidget {
-  final String userId; // Add userId as a parameter
+  final String userId;
 
-  AddDoctorsPage({required this.userId}); // Constructor to accept userId
+  // Using super(key) as per the suggestion
+  const AddDoctorsPage({super.key, required this.userId});
 
   @override
-  _AddDoctorsState createState() => _AddDoctorsState();
+  AddDoctorsState createState() => AddDoctorsState(); // Change _AddDoctorsState to AddDoctorsState
 }
 
-class _AddDoctorsState extends State<AddDoctorsPage> {
-  // List of specializations for doctors
+class AddDoctorsState extends State<AddDoctorsPage> {  // Changed to public class
   final List<String> _specializations = ['Physician', 'Dietitian', 'Psychologist', 'Cardiologist'];
-  Map<String, String> _connectedDoctors = {}; // Map to store connected doctors' names
+  Map<String, String> _connectedDoctors = {};
 
   @override
   void initState() {
@@ -22,57 +22,47 @@ class _AddDoctorsState extends State<AddDoctorsPage> {
     _fetchConnectedDoctors();
   }
 
-  // Function to fetch the connected doctors for the current user
   Future<void> _fetchConnectedDoctors() async {
     try {
-      // Query the connections collection for accepted connections where the user has sent the request
       final querySnapshot = await FirebaseFirestore.instance
           .collection('connections')
-          .where('userId', isEqualTo: widget.userId) // Check if the logged-in user is the sender
-          .where('status', isEqualTo: 'connected')  // Only fetch connections that are connected
+          .where('userId', isEqualTo: widget.userId)
+          .where('status', isEqualTo: 'connected')
           .get();
 
       Map<String, String> connectedDoctors = {};
 
-      // Loop through each connection document
       for (var doc in querySnapshot.docs) {
-        // Get the doctorId from the connection document
         String doctorId = doc['doctorId'];
 
-        // Fetch doctor details from the users collection using doctorId
         DocumentSnapshot doctorSnapshot = await FirebaseFirestore.instance
             .collection('users')
-            .doc(doctorId)  // Using doctorId as UID
+            .doc(doctorId)
             .get();
 
-        // Check if the doctor document exists
         if (doctorSnapshot.exists) {
-          // Retrieve the name and specialization from the doctor document
           String doctorName = doctorSnapshot['name'] ?? 'Unknown Doctor';
           String specialization = doctorSnapshot['specialization'] ?? 'Unknown Specialization';
 
-          // Store the doctor's name under the specialization
           connectedDoctors[specialization] = doctorName;
         }
       }
 
-      // Update the UI with the connected doctors
       setState(() {
         _connectedDoctors = connectedDoctors;
       });
     } catch (e) {
-      print("Error fetching connected doctors: $e");
+      debugPrint("Error fetching connected doctors: $e");
     }
   }
 
-  // Function to navigate to ShowDoctors page with selected specialization
   void _navigateToShowDoctors(String specialization) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ShowDoctorsPage(
           profession: specialization,
-          userId: widget.userId,  // Pass userId here
+          userId: widget.userId,
         ),
       ),
     );
@@ -82,7 +72,7 @@ class _AddDoctorsState extends State<AddDoctorsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Doctors'),
+        title: const Text('Add Doctors'),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -91,21 +81,20 @@ class _AddDoctorsState extends State<AddDoctorsPage> {
           itemCount: _specializations.length,
           itemBuilder: (context, index) {
             String specialization = _specializations[index];
-            // Get the doctor's name if connected, otherwise show an empty string
             String doctorName = _connectedDoctors[specialization] ?? '';
 
             return Card(
-              margin: EdgeInsets.symmetric(vertical: 8.0),
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
               child: ListTile(
                 title: Text(
                   specialization,
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
                 subtitle: doctorName.isEmpty
-                    ? Text('No doctor connected', style: TextStyle(color: Colors.red))
-                    : Text('Connected with: $doctorName', style: TextStyle(color: Colors.green)),
-                trailing: Icon(Icons.arrow_forward),
-                onTap: () => _navigateToShowDoctors(specialization), // Always navigate to ShowDoctorsPage
+                    ? const Text('No doctor connected', style: TextStyle(color: Colors.red))
+                    : Text('Connected with: $doctorName', style: const TextStyle(color: Colors.green)),
+                trailing: const Icon(Icons.arrow_forward),
+                onTap: () => _navigateToShowDoctors(specialization),
               ),
             );
           },

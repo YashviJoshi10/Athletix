@@ -5,9 +5,9 @@ import 'package:myapp/screens/Athlete/goal_setting.dart';
 import 'package:myapp/screens/Athlete/injury_management.dart';
 import 'login.dart'; // Assuming the login page is in this file
 import 'profile.dart';
-import '../Athlete/AthleteDashboardPage.dart'; // Import athlete-specific screen
-import '../Coach/CoachDashboardPage.dart'; // Import coach-specific screen
-import '../Organization/OrganizationDashboardPage.dart'; // Import organization-specific screen
+import '../Athlete/athlete_dashboard_page.dart'; // Import athlete-specific screen
+import '../Coach/coach_dashboard_page.dart'; // Import coach-specific screen
+import '../Organization/organization_dashboard_page.dart'; // Import organization-specific screen
 
 class DrawerMenu extends StatefulWidget {
   const DrawerMenu({super.key});

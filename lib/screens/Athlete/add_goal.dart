@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
+// No need to define 'key' explicitly in the constructor anymore.
 class AddGoalPage extends StatefulWidget {
+  const AddGoalPage({Key? key}) : super(key: key); // The super constructor takes care of the key.
+
   @override
-  _AddGoalPageState createState() => _AddGoalPageState();
+  AddGoalPageState createState() => AddGoalPageState(); // Using the public state class.
 }
 
-class _AddGoalPageState extends State<AddGoalPage> {
+class AddGoalPageState extends State<AddGoalPage> {
   final TextEditingController goalNameController = TextEditingController();
   final TextEditingController goalTextController = TextEditingController();
   String? selectedGoalType;
@@ -57,7 +60,7 @@ class _AddGoalPageState extends State<AddGoalPage> {
                   );
                 }
               },
-              child: Text("Add Another Goal"),
+              child: Text("Save this Goal"),
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -73,7 +76,7 @@ class _AddGoalPageState extends State<AddGoalPage> {
                   );
                 }
               },
-              child: Text("Save Goals"),
+              child: Text("Save"),
             ),
           ],
         ),

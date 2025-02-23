@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import '../Common/NotificationsPage.dart'; // Import the NotificationsPage
+import '../Common/notifications_page.dart'; // Import the NotificationsPage
 import '../Common/drawer_menu.dart'; // Import the DrawerMenu
 import '../Common/message.dart';
 
-class DietitianDashboardPage extends StatelessWidget {
+class PsychologistDashboardPage extends StatelessWidget {
+  // Add the key parameter to the constructor
+  const PsychologistDashboardPage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Dietitian Dashboard'),
+        title: Text('Psychologist Dashboard'),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
@@ -39,7 +42,6 @@ class DietitianDashboardPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (context) => MessageScreen()),
               );
-              print("Messages pressed");
             },
           ),
         ],
@@ -47,7 +49,7 @@ class DietitianDashboardPage extends StatelessWidget {
       drawer: DrawerMenu(), // Add the DrawerMenu to the scaffold
       body: Center(
         child: Text(
-          'Welcome, Dietitian!',
+          'Welcome, Psychologist!',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/screens/Athlete/injury_management.dart';
 import '../Common/drawer_menu.dart';
 import '../Common/message.dart';
@@ -7,26 +10,47 @@ import 'goal_setting.dart';
 class AthleteDashboardPage extends StatelessWidget {
   const AthleteDashboardPage({Key? key}) : super(key: key);
 
+  Future<String> _getUserName() async {
+    User? user = FirebaseAuth.instance.currentUser; // Get the current user
+    if (user != null) {
+      // Fetch user info from Firestore
+      DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      return doc['name'] ?? 'Athlete'; // Default to 'Athlete' if no name is found
+    }
+    return 'Athlete'; // Default fallback
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold( // Make sure the Scaffold widget wraps the content here
       appBar: AppBar(
-        title: Text('Athlete Dashboard'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blueAccent, Colors.lightBlueAccent], // Gradient color
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: Text(
+          'Athlete Dashboard',
+          style: GoogleFonts.roboto(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         leading: Builder(
           builder: (BuildContext context) {
             return IconButton(
-              icon: Icon(Icons.menu), // Hamburger icon
+              icon: Icon(Icons.menu),
               onPressed: () {
-                Scaffold.of(context).openDrawer(); // Opens the drawer on button press
+                Scaffold.of(context).openDrawer();
               },
             );
           },
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.message), // Messaging icon
+            icon: Icon(Icons.message),
             onPressed: () {
-              // Navigate to MessagePage when the messaging icon is pressed
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => MessageScreen()),
@@ -35,63 +59,147 @@ class AthleteDashboardPage extends StatelessWidget {
           ),
         ],
       ),
-      drawer: DrawerMenu(), // Add the DrawerMenu to the scaffold
+      drawer: DrawerMenu(), // Assuming this is your custom DrawerMenu widget
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
-            Text(
-              'Welcome, Athlete!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            // Welcome Message with Shadow and Gradient
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: FutureBuilder<String>(
+                future: _getUserName(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Text(
+                      'Welcome, Athlete!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        shadows: [
+                          Shadow(offset: Offset(2, 2), blurRadius: 6, color: Colors.black.withOpacity(0.3))
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasData) {
+                    return Text(
+                      'Welcome, ${snapshot.data}!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        shadows: [
+                          Shadow(offset: Offset(2, 2), blurRadius: 6, color: Colors.black.withOpacity(0.3))
+                        ],
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      'Welcome, Athlete!',
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        shadows: [
+                          Shadow(offset: Offset(2, 2), blurRadius: 6, color: Colors.black.withOpacity(0.3))
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
-            SizedBox(height: 20),
-            // Example sections with no arrow icon
-            ListTile(
-              leading: Icon(Icons.directions_run),
-              title: Text('Performance Tracker'),
-              subtitle: Text('Track your daily performance and stats.'),
+
+            // Performance Tracker Card
+            _buildDashboardTile(
+              context,
+              icon: Icons.directions_run,
+              title: 'Performance Tracker',
+              subtitle: 'Track your daily performance and stats.',
               onTap: () {
-                // Add functionality (no navigation here)
+                // Add functionality here
               },
-              trailing: null,  // Removes the trailing arrow
+              color: Colors.tealAccent,
             ),
-            ListTile(
-              leading: Icon(Icons.health_and_safety),
-              title: Text('Injury Management'),
-              subtitle: Text('Log and monitor injuries for recovery.'),
+
+            // Injury Management Card
+            _buildDashboardTile(
+              context,
+              icon: Icons.health_and_safety,
+              title: 'Injury Management',
+              subtitle: 'Log and monitor injuries for recovery.',
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => InjuryManagementPage()),
                 );
               },
-              trailing: null,  // Removes the trailing arrow
+              color: Colors.orangeAccent,
             ),
-            // New Goal Setting Feature
-            ListTile(
-              leading: Icon(Icons.flag),
-              title: Text('Goal Setting'),
-              subtitle: Text('Set and track your fitness & career goals.'),
+
+            // Goal Setting Card
+            _buildDashboardTile(
+              context,
+              icon: Icons.flag,
+              title: 'Goal Setting',
+              subtitle: 'Set and track your fitness & career goals.',
               onTap: () {
-                // Navigate to Goal Setting Page
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => GoalSettingPage()),
                 );
               },
-              trailing: null,  // Removes the trailing arrow
+              color: Colors.blueAccent,
             ),
-            ListTile(
-              leading: Icon(Icons.account_balance_wallet),
-              title: Text('Financial Management'),
-              subtitle: Text('Manage sponsorships and expenses.'),
+
+            // Financial Management Card
+            _buildDashboardTile(
+              context,
+              icon: Icons.account_balance_wallet,
+              title: 'Financial Management',
+              subtitle: 'Manage sponsorships and expenses.',
               onTap: () {
-                // Add functionality (no navigation here)
+                // Add functionality here
               },
-              trailing: null,  // Removes the trailing arrow
+              color: Colors.greenAccent,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDashboardTile(
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required String subtitle,
+        required VoidCallback onTap,
+        required Color color,
+      }) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 6.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: ListTile(
+          contentPadding: EdgeInsets.all(16),
+          leading: Icon(
+            icon,
+            size: 32,
+            color: color,
+          ),
+          title: Text(
+            title,
+            style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: GoogleFonts.lato(fontSize: 14, color: Colors.grey),
+          ),
         ),
       ),
     );

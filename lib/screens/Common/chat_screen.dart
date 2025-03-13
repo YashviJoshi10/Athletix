@@ -35,7 +35,35 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.receiverName),
+        backgroundColor: Colors.grey[900],
+        iconTheme: IconThemeData(color: Colors.white), // Set the back button color to white
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.grey,
+              child: Text(
+                widget.receiverName[0].toUpperCase(), // First letter of receiver's name
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            SizedBox(width: 10),
+            Text(
+              widget.receiverName,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    blurRadius: 10.0,
+                    color: Colors.blueAccent,
+                    offset: Offset(0, 0),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -71,14 +99,24 @@ class _ChatScreenState extends State<ChatScreen> {
                       alignment: isSentByMe ? Alignment.centerRight : Alignment.centerLeft,
                       child: Container(
                         margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                        padding: EdgeInsets.all(10),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isSentByMe ? Colors.blue : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(10),
+                          color: isSentByMe ? Colors.blueAccent : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 5,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Text(
                           message['message'],
-                          style: TextStyle(color: isSentByMe ? Colors.white : Colors.black),
+                          style: TextStyle(
+                            color: isSentByMe ? Colors.white : Colors.black,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     );
@@ -92,18 +130,25 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Type a message...',
+                        hintStyle: TextStyle(color: Colors.white54),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                       ),
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: Icon(Icons.send, color: Colors.blueAccent),
                   onPressed: () {
                     _sendMessage();
                     _scrollToBottom();  // Trigger scroll after sending message

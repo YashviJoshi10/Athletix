@@ -20,21 +20,23 @@ class _ShowGoalPageState extends State<ShowGoalPage> {
       appBar: AppBar(title: Text(widget.goal['name'])),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            for (int index = 0; index < widget.goal['subGoals'].length; index++)
-              _buildSubGoalItem(index, widget.goal['subGoals']),
-            // Add the Congratulations message if all subgoals are completed
-            if (_areAllSubGoalsCompleted(widget.goal['subGoals']))
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Congratulations! You have completed the Goal - ${widget.goal['name']}',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
-                  textAlign: TextAlign.center,
+        child: SingleChildScrollView(  // Wrap the Column with a SingleChildScrollView
+          child: Column(
+            children: [
+              for (int index = 0; index < widget.goal['subGoals'].length; index++)
+                _buildSubGoalItem(index, widget.goal['subGoals']),
+              // Add the Congratulations message if all subgoals are completed
+              if (_areAllSubGoalsCompleted(widget.goal['subGoals']))
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'Congratulations! You have completed the Goal - ${widget.goal['name']}',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

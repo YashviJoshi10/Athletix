@@ -43,7 +43,7 @@
 | **Gemini API** | AI-powered recommendations                         |
 | **Node.js**    | Backend server for API security                    |
 | **JavaScript** | Backend scripting and logic                        |
-| **Vercel**     | Hosting                                            |
+| **Vercel**     | Hosting the Backend Server                         |
 
 ## 🚀 Getting Started
 

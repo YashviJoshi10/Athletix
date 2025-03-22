@@ -49,7 +49,7 @@
 
 ### Prerequisites
 - Install **Flutter & Dart SDK**
-- Set up **Android Studio** or **Project IDX**
+- Set up **Android Studio** or **Project IDX**(If Project IDX, then add .idx folder in the root directory)
 - Configure **Firebase** in the project
 
 ### Installation

@@ -91,6 +91,10 @@ This project uses Firebase services. To set up Firebase for development:
 - GitHub: [@Amitouja](https://github.com/Amitouja)
 - LinkedIn: [Amitouja Bose Tagore](https://www.linkedin.com/in/amitouja/)
 
+👤 **Sajjanshetty Shivani**
+ - GitHub: [@shivanishetty005](https://github.com/shivanishetty005)
+ - LinkedIn: [Shivani Sajjanshetty](https://www.linkedin.com/in/shivani-sajjanshetty-6345a72b8/)
+
 👤 **Syed Rizwan**
 - GitHub: [@rizwansyed995](https://github.com/rizwansyed995)
 - LinkedIn: [Syed Rizwan](https://www.linkedin.com/in/syed-rizwan-2264b5289/)

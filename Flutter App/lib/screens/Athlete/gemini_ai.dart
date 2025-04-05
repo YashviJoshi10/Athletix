@@ -40,7 +40,7 @@ class _GeminiAIPageState extends State<GeminiAIPage> {
       }
 
       final response = await http.post(
-        Uri.parse('https://athletix-proxy-server.vercel.app/api/gemini'),
+        Uri.parse('<SERVER_URL>/api/gemini'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

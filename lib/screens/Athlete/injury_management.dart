@@ -56,53 +56,54 @@ class _InjuryManagementPageState extends State<InjuryManagementPage> {
       appBar: AppBar(
         title: const Text("Injury Management"),
         backgroundColor: Colors.green,
-        centerTitle: true,  // Center the title for a modern look
+        centerTitle: true,
+        elevation: 0, // Remove shadow to make the AppBar cleaner
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),  // Increase padding around the body
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,  // Align children to the start
+          crossAxisAlignment: CrossAxisAlignment.center,  // Center the content
+          mainAxisAlignment: MainAxisAlignment.start,  // Align buttons to start
           children: [
-            // Elevated button with gradient effect
-            ElevatedButton(
-              onPressed: () {
+            // Add a brief description or content section
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: Text(
+                'Welcome to the Injury Management Dashboard. Here, you can view and manage injury records, add new injuries, and get responses from AI based on previous entries.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            // Gradient Button for Add Injury
+            _buildGradientButton(
+              context,
+              'Add Injury',
+              Colors.green,
+                  () {
                 Navigator.push(
                   context,
                   _createRoute(const AddInjuryPage()),
                 );
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,  // Corrected to backgroundColor
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),  // Rounded corners for buttons
-                ),
-                shadowColor: Colors.greenAccent,  // Button shadow color
-              ).copyWith(
-                elevation: MaterialStateProperty.all(10),
-              ),
-              child: const Text("Add Injury", style: TextStyle(fontSize: 18,color: Colors.white)),
             ),
-            const SizedBox(height: 20),  // Add space between buttons
+            const SizedBox(height: 20),
 
-            // Button for AI responses with gradient
-            ElevatedButton(
-              onPressed: () {
+            // Gradient Button for AI Responses
+            _buildGradientButton(
+              context,
+              'Get Previous AI Responses',
+              Colors.blue,
+                  () {
                 Navigator.push(
                   context,
                   _createRoute(AIResponsesPage()),  // Navigate to AIResponsesPage
                 );
               },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                elevation: 10,
-              ).copyWith(
-                backgroundColor: MaterialStateProperty.all(Colors.green),
-              ),
-              child: const Text("Get Previous AI Responses", style: TextStyle(fontSize: 18,color: Colors.white)),
             ),
             const SizedBox(height: 20),  // Add space between buttons and the list
 
@@ -151,6 +152,31 @@ class _InjuryManagementPageState extends State<InjuryManagementPage> {
     );
   }
 
+  // Gradient Button Function
+  Widget _buildGradientButton(
+      BuildContext context,
+      String text,
+      Color color,
+      VoidCallback onPressed,
+      ) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        elevation: 5,
+      ).copyWith(
+        backgroundColor: MaterialStateProperty.all(color),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 18, color: Colors.white),
+      ),
+    );
+  }
+
   PageRouteBuilder _createRoute(Widget page) {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
@@ -192,7 +218,7 @@ class AnimatedCard extends StatelessWidget {
         );
       },
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
@@ -201,22 +227,23 @@ class AnimatedCard extends StatelessWidget {
               color: Colors.grey.withOpacity(0.4),
               spreadRadius: 2,
               blurRadius: 5,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             ),
           ],
           color: Colors.white,
         ),
         child: ListTile(
           title: Text(
-            injuryId,  // Injury ID (e.g., injury_1, injury_2)
+            injuryId,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: Colors.green,  // Added color to the title for emphasis
             ),
           ),
           subtitle: Text(
-            'Date: $date\n$descriptions',  // Descriptions and Date
-            overflow: TextOverflow.ellipsis,  // Prevent overflow
+            'Date: $date\n$descriptions',
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
           leading: Icon(

@@ -34,36 +34,10 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeInAnimation;
-  bool _showTextAndButton = false;
-  double _logoMargin = 0.0;
+class _SplashScreenState extends State<SplashScreen> {
   final Color buttonColor = Colors.green;
 
-  @override
-  void initState() {
-    super.initState();
-    // Animation controller for fade-in effect
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..forward();
-
-    // Animation for fade-in
-    _fadeInAnimation = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
-
-    Timer(const Duration(seconds: 4), () {
-      if (mounted) {
-        setState(() {
-          _showTextAndButton = true;
-          _logoMargin = 20.0;
-        });
-      }
-    });
-  }
+  // Remove the automatic navigation from initState
 
   Future<void> _navigateBasedOnProfession(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
@@ -152,12 +126,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -172,67 +140,52 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Stack(
-                alignment: Alignment.center,
+              // Directly display the logo without animation
+              Container(
+                child: Image.asset(
+                  'assets/splashicon1.png', // Use the default logo
+                  width: 150, // Logo size
+                  height: 150,
+                ),
+              ),
+              SizedBox(height: 40), // Increased spacing
+              // Display text and button after logo
+              Column(
                 children: [
-                  // Logo animation and fade-in effect
-                  FadeTransition(
-                    opacity: _fadeInAnimation,
-                    child: Container(
-                      margin: EdgeInsets.only(top: _logoMargin),
-                      child: Image.asset(
-                        _showTextAndButton
-                            ? 'assets/splashicon2.png'
-                            : 'assets/splashicon1.png',
-                        width: 150, // Increased logo size
-                        height: 150,
+                  Text(
+                    'Welcome to Athletix',
+                    style: TextStyle(
+                      fontSize: 30.0, // Larger font size
+                      color: Colors.white, // White text color
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 10.0,
+                          offset: Offset(2.0, 2.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30), // Increased space between text and button
+                  ElevatedButton(
+                    onPressed: () => _navigateBasedOnProfession(context),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Bigger button padding
+                      backgroundColor: buttonColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30), // Rounded corners
+                      ),
+                    ),
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 40), // Increased spacing
-              // Fade in text and button after animation
-              if (_showTextAndButton)
-                FadeTransition(
-                  opacity: _fadeInAnimation,
-                  child: Column(
-                    children: [
-                      Text(
-                        'Welcome to Athletix',
-                        style: TextStyle(
-                          fontSize: 30.0, // Larger font size
-                          color: Colors.white, // White text color
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 10.0,
-                              offset: Offset(2.0, 2.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 30), // Increased space between text and button
-                      ElevatedButton(
-                        onPressed: () => _navigateBasedOnProfession(context),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15), // Bigger button padding
-                          backgroundColor: buttonColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30), // Rounded corners
-                          ),
-                        ),
-                        child: const Text(
-                          'Get Started',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
             ],
           ),
         ),

@@ -107,16 +107,54 @@ class _GoalSettingPageState extends State<GoalSettingPage> {
   }
 
   void _deleteGoal(int index) {
-    setState(() {
-      goals.removeAt(index);
-    });
-    _saveGoalsToFirestore();
+    // Show confirmation dialog before deleting the goal
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Are you sure?"),
+          content: Text("Do you want to delete this goal? This action cannot be undone."),
+          actions: [
+            // Cancel Button
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog without deleting
+              },
+              child: Text("Cancel"),
+            ),
+            // Delete Button
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  goals.removeAt(index); // Remove the goal from the list
+                });
+                _saveGoalsToFirestore(); // Update Firestore
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text("Delete"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Use backgroundColor instead of primary
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Goal Setting")),
+      appBar: AppBar(
+        title: Text("Goal Setting", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _fetchGoalsFromFirestore,
+            tooltip: 'Refresh Goals',
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -125,33 +163,41 @@ class _GoalSettingPageState extends State<GoalSettingPage> {
             Text('Your Goals', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
+              child: goals.isEmpty
+                  ? Center(child: Text("No goals yet. Start adding some!"))
+                  : ListView.separated(
                 itemCount: goals.length,
+                separatorBuilder: (context, index) => Divider(),
                 itemBuilder: (context, index) {
                   final goal = goals[index];
                   final goalName = goal['name'] ?? "Unnamed Goal";
                   final bool allCompleted = goal['subGoals'].every((subGoal) => subGoal['status'] == "completed");
 
                   return Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     margin: EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
                       leading: Icon(
                         allCompleted ? Icons.check_circle : Icons.error_outline,
                         color: allCompleted ? Colors.green : Colors.red,
+                        size: 30,
                       ),
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(child: Text(goalName)),
+                          Expanded(child: Text(goalName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600))),
                           Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.edit),
+                                icon: Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () => _editGoal(index),
                               ),
                               IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () => _deleteGoal(index),
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _deleteGoal(index), // Calls the delete confirmation dialog
                               ),
                             ],
                           ),
@@ -170,17 +216,16 @@ class _GoalSettingPageState extends State<GoalSettingPage> {
                   );
                 },
               ),
-
             ),
             SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: _navigateToAddGoalPage,
-                child: Text("Add Goal"),
-              ),
-            ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddGoalPage,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blue,
+        tooltip: "Add Goal",
       ),
     );
   }

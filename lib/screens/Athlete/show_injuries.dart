@@ -13,6 +13,7 @@ class ShowInjuryPage extends StatefulWidget {
 
 class _ShowInjuryPageState extends State<ShowInjuryPage> {
   late Map<String, dynamic> injuryDetails;
+  bool isLoading = true; // Track loading state
 
   @override
   void initState() {
@@ -32,13 +33,20 @@ class _ShowInjuryPageState extends State<ShowInjuryPage> {
       if (injurySnapshot.exists) {
         setState(() {
           injuryDetails = injurySnapshot.data()!;
+          isLoading = false; // Set loading to false when data is fetched
         });
       } else {
+        setState(() {
+          isLoading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Injury details not found")),
         );
       }
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       print("Error fetching injury details: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error fetching injury details")),
@@ -47,6 +55,7 @@ class _ShowInjuryPageState extends State<ShowInjuryPage> {
   }
 
   // Show dialog asking if user wants AI recommendations
+  // Inside _showAIRecommendationDialog
   void _showAIRecommendationDialog() {
     showDialog(
       context: context,
@@ -81,12 +90,18 @@ class _ShowInjuryPageState extends State<ShowInjuryPage> {
                   return;
                 }
 
-                // Navigate to Gemini AI page with filtered descriptions
+                // Custom message to provide context for the AI
+                String customMessage = "Hey, I am an athlete, and I am injured. Can you tell me some recovery tips or precautions to take?";
+
+                // Combine the custom message with the injury descriptions
+                List<String> inputForAI = [customMessage] + descriptions;
+
+                // Navigate to Gemini AI page with the custom message and descriptions
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => GeminiAIPage(
-                      descriptions: descriptions,
+                      descriptions: inputForAI, // Pass both message and descriptions
                     ),
                   ),
                 );
@@ -113,44 +128,76 @@ class _ShowInjuryPageState extends State<ShowInjuryPage> {
             // Display injury details: Date and description(s)
             Text(
               "Injury Date: ${widget.injuryDate}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Injury Details:",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            // List all injury descriptions
-            Expanded(
-              child: ListView.builder(
-                itemCount: injuryDetails.length,
-                itemBuilder: (context, index) {
-                  String key = injuryDetails.keys.elementAt(index);
-                  if (key != 'userId' && key != 'injuryDate') {
-                    return Card(
-                      elevation: 2,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(injuryDetails[key] ?? "No description"),
-                      ),
-                    );
-                  }
-                  return const SizedBox(); // Skip 'userId' and 'injuryDate'
-                },
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
+            const SizedBox(height: 16),
+            const Text(
+              "Injury Details:",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Loading Indicator while fetching data
+            if (isLoading)
+              Center(
+                child: CircularProgressIndicator(
+                  color: Colors.green,
+                ),
+              )
+            else
+            // List all injury descriptions
+              Expanded(
+                child: ListView.builder(
+                  itemCount: injuryDetails.length,
+                  itemBuilder: (context, index) {
+                    String key = injuryDetails.keys.elementAt(index);
+                    if (key != 'userId' && key != 'injuryDate') {
+                      return Card(
+                        elevation: 5,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            injuryDetails[key] ?? "No description",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox(); // Skip 'userId' and 'injuryDate'
+                  },
+                ),
+              ),
 
             // AI Recommendations Button
-            ElevatedButton(
-              onPressed: _showAIRecommendationDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+            const SizedBox(height: 20),
+            // AI Recommendations Button
+            Center(
+              child: ElevatedButton(
+                onPressed: _showAIRecommendationDialog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green, // Correct parameter
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  "AI Recommendations",
+                  style: TextStyle(fontSize: 18),
+                ),
               ),
-              child: const Text("AI Recommendations", style: TextStyle(fontSize: 18)),
             ),
           ],
         ),

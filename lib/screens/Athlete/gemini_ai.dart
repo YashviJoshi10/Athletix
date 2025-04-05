@@ -40,7 +40,7 @@ class _GeminiAIPageState extends State<GeminiAIPage> {
       }
 
       final response = await http.post(
-        Uri.parse('<SERVER_URL>/api/gemini'),
+        Uri.parse('BACKEND_SERVER_URL/api/gemini'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -95,6 +95,29 @@ class _GeminiAIPageState extends State<GeminiAIPage> {
     print('AI response saved to Firestore');
   }
 
+  // Function to parse the AI response and convert **bold text** to Text widgets with bold styling
+  List<Widget> _parseResponseForBoldText(String response) {
+    List<Widget> parsedResponse = [];
+    // Split the response by '**' to detect bold parts
+    List<String> parts = response.split('**');
+
+    // Iterate through parts and alternate between normal and bold
+    for (int i = 0; i < parts.length; i++) {
+      if (i % 2 == 0) {
+        // Even index, normal text
+        parsedResponse.add(Text(parts[i]));
+      } else {
+        // Odd index, bold text
+        parsedResponse.add(Text(
+          parts[i],
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ));
+      }
+    }
+
+    return parsedResponse;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -106,6 +129,7 @@ class _GeminiAIPageState extends State<GeminiAIPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Gemini AI Recommendations"),
+        backgroundColor: Colors.green, // Green color for the app bar
       ),
       body: Column(
         children: [
@@ -120,17 +144,34 @@ class _GeminiAIPageState extends State<GeminiAIPage> {
                   alignment: isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isUserMessage ? Colors.blue : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      message['message']!,
-                      style: TextStyle(
-                        color: isUserMessage ? Colors.white : Colors.black,
-                        fontSize: 16,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: isUserMessage
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                      children: [
+                        // Parse bold text and show messages
+                        ..._parseResponseForBoldText(message['message']!),
+                        SizedBox(height: 4), // Small gap between message and time
+                        Text(
+                          'Just now', // Placeholder for message timestamp
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );

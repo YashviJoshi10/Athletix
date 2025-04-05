@@ -112,7 +112,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sign Up'), automaticallyImplyLeading: false),
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        backgroundColor: Colors.blueAccent,
+        elevation: 0,
+      ),
       body: Stack(
         children: [
           Opacity(
@@ -132,27 +136,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   Center(
                     child: Text(
                       'Athletix',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(height: 40),
 
+                  // Full Name Input
                   TextField(
                     controller: _nameController,
-                    decoration: InputDecoration(labelText: 'Full Name'),
+                    decoration: InputDecoration(
+                      labelText: 'Full Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: Icon(Icons.person),
+                    ),
                   ),
+                  SizedBox(height: 12),
 
+                  // Date of Birth
                   GestureDetector(
                     onTap: () => _selectDate(context),
                     child: AbsorbPointer(
                       child: TextField(
                         controller: _dobController,
-                        decoration: InputDecoration(labelText: 'Date of Birth'),
+                        decoration: InputDecoration(
+                          labelText: 'Date of Birth',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: Icon(Icons.calendar_today),
+                        ),
                         readOnly: true,
                       ),
                     ),
                   ),
+                  SizedBox(height: 12),
 
+                  // Profession Dropdown
                   DropdownButtonFormField<String>(
                     value: _selectedProfession,
                     onChanged: (newValue) {
@@ -162,7 +183,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         _selectedSpecialization = null;
                       });
                     },
-                    decoration: InputDecoration(labelText: 'Profession'),
+                    decoration: InputDecoration(
+                      labelText: 'Profession',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: Icon(Icons.work),
+                    ),
                     items: professions.map((profession) {
                       return DropdownMenuItem(
                         value: profession,
@@ -171,8 +198,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     }).toList(),
                     hint: Text('Select Profession'),
                   ),
+                  SizedBox(height: 12),
 
-                  // Show Sport Dropdown only if profession is Athlete or Coach
+                  // Sport Dropdown (only if applicable)
                   if (_selectedProfession == 'Athlete' || _selectedProfession == 'Coach')
                     DropdownButtonFormField<String>(
                       value: _selectedSport,
@@ -181,7 +209,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _selectedSport = newValue;
                         });
                       },
-                      decoration: InputDecoration(labelText: 'Sport'),
+                      decoration: InputDecoration(
+                        labelText: 'Sport',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: Icon(Icons.sports),
+                      ),
                       items: sports.map((sport) {
                         return DropdownMenuItem(
                           value: sport,
@@ -190,8 +224,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       }).toList(),
                       hint: Text('Select Sport'),
                     ),
+                  SizedBox(height: 12),
 
-                  // Show Specialization Dropdown only if profession is Doctor
+                  // Specialization Dropdown (only if Doctor)
                   if (_selectedProfession == 'Doctor')
                     DropdownButtonFormField<String>(
                       value: _selectedSpecialization,
@@ -200,7 +235,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _selectedSpecialization = newValue;
                         });
                       },
-                      decoration: InputDecoration(labelText: 'Specialization'),
+                      decoration: InputDecoration(
+                        labelText: 'Specialization',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefixIcon: Icon(Icons.local_hospital),
+                      ),
                       items: doctorSpecializations.map((specialization) {
                         return DropdownMenuItem(
                           value: specialization,
@@ -209,30 +250,65 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       }).toList(),
                       hint: Text('Select Specialization'),
                     ),
+                  SizedBox(height: 12),
 
+                  // Phone Number Input
                   TextField(
                     controller: _phoneController,
-                    decoration: InputDecoration(labelText: 'Phone Number'),
+                    decoration: InputDecoration(
+                      labelText: 'Phone Number',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: Icon(Icons.phone),
+                    ),
                     keyboardType: TextInputType.phone,
                   ),
+                  SizedBox(height: 12),
 
+                  // Email Input
                   TextField(
                     controller: _emailController,
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: Icon(Icons.email),
+                    ),
                     keyboardType: TextInputType.emailAddress,
                   ),
+                  SizedBox(height: 12),
 
+                  // Password Input
                   TextField(
                     controller: _passwordController,
-                    decoration: InputDecoration(labelText: 'Password'),
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
                     obscureText: true,
                   ),
+                  SizedBox(height: 20),
 
+                  // Sign Up Button
                   ElevatedButton(
                     onPressed: _signUp,
-                    child: Text('Sign Up'),
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
+                  SizedBox(height: 20),
 
+                  // Login Link
                   TextButton(
                     onPressed: () {
                       Navigator.push(

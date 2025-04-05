@@ -21,7 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Function to login the user
   Future<void> _login() async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -30,69 +29,48 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (userCredential.user!.emailVerified) {
-        // Fetch the user's profession from Firestore
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(userCredential.user!.uid)
             .get();
 
         if (userDoc.exists) {
-          String profession = userDoc.get('profession'); // Fetch profession
+          String profession = userDoc.get('profession');
 
-          // Redirect based on profession
-          if (profession == 'Athlete') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => AthleteDashboardPage()),
-            );
-          } else if (profession == 'Coach') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => CoachDashboardPage()),
-            );
-          } else if (profession == 'Organization') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => OrganizationDashboardPage()),
-            );
-          } else if (profession == 'Doctor') {
-            // Fetch specialization for doctors
-            String specialization = userDoc.get('specialization');
-
-            if (specialization == 'Physician') {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => PhysicianDashboardPage()),
-              );
-            } else if (specialization == 'Dietitian') {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => DietitianDashboardPage()),
-              );
-            } else if (specialization == 'Psychologist') {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => PsychologistDashboardPage()),
-              );
-            } else if (specialization == 'Cardiologist') {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => CardiologistDashboardPage()),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Unknown specialization: $specialization')),
-              );
-            }
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Unknown profession: $profession')),
-            );
+          switch (profession) {
+            case 'Athlete':
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => AthleteDashboardPage()));
+              break;
+            case 'Coach':
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CoachDashboardPage()));
+              break;
+            case 'Organization':
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => OrganizationDashboardPage()));
+              break;
+            case 'Doctor':
+              String specialization = userDoc.get('specialization');
+              switch (specialization) {
+                case 'Physician':
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PhysicianDashboardPage()));
+                  break;
+                case 'Dietitian':
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DietitianDashboardPage()));
+                  break;
+                case 'Psychologist':
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PsychologistDashboardPage()));
+                  break;
+                case 'Cardiologist':
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CardiologistDashboardPage()));
+                  break;
+                default:
+                  _showError('Unknown specialization: $specialization');
+              }
+              break;
+            default:
+              _showError('Unknown profession: $profession');
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('User data not found in Firestore')),
-          );
+          _showError('User data not found in Firestore');
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,10 +79,12 @@ class _LoginScreenState extends State<LoginScreen> {
         await userCredential.user!.sendEmailVerification();
       }
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Login failed')),
-      );
+      _showError(e.message ?? 'Login failed');
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -112,53 +92,83 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Login'),
-        automaticallyImplyLeading: false,
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
       ),
-      resizeToAvoidBottomInset: true, // Ensure layout adjusts when keyboard appears
-      body: SingleChildScrollView( // Make the body scrollable
+      body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Circular Logo
               CircleAvatar(
                 radius: 50,
-                backgroundImage: AssetImage('assets/applogo.png'), // Replace with your logo asset
+                backgroundImage: AssetImage('assets/applogo.png'),
               ),
-              SizedBox(height: 20),
-              // App Name or Tagline
+              SizedBox(height: 16),
               Text(
                 'Athletix',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-              SizedBox(height: 40), // Space between name and email field
-              TextField(
+              SizedBox(height: 30),
+              _buildTextField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                label: 'Email',
+                icon: Icons.email,
               ),
-              TextField(
+              SizedBox(height: 16),
+              _buildTextField(
                 controller: _passwordController,
-                decoration: InputDecoration(labelText: 'Password'),
+                label: 'Password',
+                icon: Icons.lock,
                 obscureText: true,
               ),
+              SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _login,
-                child: Text('Login'),
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  backgroundColor: Colors.blueAccent,
+                ),
+                child: Text('Login', style: TextStyle(fontSize: 18)),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SignUpScreen()),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
                 },
-                child: Text('Create an account'),
+                child: Text('Create an account', style: TextStyle(color: Colors.blueAccent)),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({required TextEditingController controller, required String label, IconData? icon, bool obscureText = false}) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: icon != null ? Icon(icon) : null,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.blueAccent, width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey, width: 1),
         ),
       ),
     );

@@ -3,11 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myapp/screens/Athlete/goal_setting.dart';
 import 'package:myapp/screens/Athlete/injury_management.dart';
-import 'login.dart'; // Assuming the login page is in this file
+import 'login.dart';
 import 'profile.dart';
-import '../Athlete/athlete_dashboard_page.dart'; // Import athlete-specific screen
-import '../Coach/coach_dashboard_page.dart'; // Import coach-specific screen
-import '../Organization/organization_dashboard_page.dart'; // Import organization-specific screen
+import '../Athlete/athlete_dashboard_page.dart';
+import '../Coach/coach_dashboard_page.dart';
+import '../Organization/organization_dashboard_page.dart'; // New screen
 
 class DrawerMenu extends StatefulWidget {
   const DrawerMenu({super.key});
@@ -17,37 +17,30 @@ class DrawerMenu extends StatefulWidget {
 }
 
 class _DrawerMenuState extends State<DrawerMenu> {
-  String userProfession = ''; // User profession: athlete, coach, organization, or other
+  String userProfession = '';
 
-  // Function to fetch user profession from Firestore or custom claims
   Future<void> _fetchUserProfession() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
         if (userDoc.exists && userDoc.data() != null) {
           Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-
-          // Fetch 'profession' field from Firestore
-          if (userData.containsKey('profession')) {
-            setState(() {
-              userProfession = userData['profession'] ?? 'athlete'; // Default to 'athlete' if no profession is found
-            });
-          } else {
-            // Handle the case where 'profession' is missing (default to 'athlete')
-            setState(() {
-              userProfession = 'athlete'; // Default profession
-            });
-          }
+          setState(() {
+            userProfession = userData['profession'] ?? 'athlete';
+          });
         } else {
           setState(() {
-            userProfession = 'athlete'; // Default profession when document doesn't exist
+            userProfession = 'athlete';
           });
         }
       } catch (e) {
         print('Error fetching user profession: $e');
         setState(() {
-          userProfession = 'athlete'; // Default profession on error
+          userProfession = 'athlete';
         });
       }
     }
@@ -56,10 +49,9 @@ class _DrawerMenuState extends State<DrawerMenu> {
   @override
   void initState() {
     super.initState();
-    _fetchUserProfession(); // Fetch user profession when the drawer is loaded
+    _fetchUserProfession();
   }
 
-  // Sign out function
   Future<void> _signOut(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
@@ -77,7 +69,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
             DrawerHeader(
               decoration: BoxDecoration(color: Colors.blue),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Center the Row content
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Menu',
@@ -87,23 +79,22 @@ class _DrawerMenuState extends State<DrawerMenu> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Spacer(), // Adds space between the title and the close button
+                  Spacer(),
                   IconButton(
                     icon: Icon(Icons.close, color: Colors.white),
                     onPressed: () {
-                      Navigator.pop(context); // Close the drawer when the close icon is clicked
+                      Navigator.pop(context);
                     },
                   ),
                 ],
               ),
             ),
-            // Conditional content based on user profession
             if (userProfession == 'Athlete') ...[
               ListTile(
                 leading: Icon(Icons.dashboard),
                 title: Text('Dashboard'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => AthleteDashboardPage()),
@@ -114,15 +105,14 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 leading: Icon(Icons.analytics),
                 title: Text('Performance Tracking'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  // Navigate to Performance Tracking
+                  Navigator.pop(context);
                 },
               ),
               ListTile(
                 leading: Icon(Icons.health_and_safety),
                 title: Text('Injury Management'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => InjuryManagementPage()),
@@ -133,7 +123,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 leading: Icon(Icons.flag),
                 title: Text('Goal Setting'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => GoalSettingPage()),
@@ -144,20 +134,18 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 leading: Icon(Icons.attach_money),
                 title: Text('Financial Planning'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  // Navigate to Financial Planning
+                  Navigator.pop(context);
                 },
               ),
             ] else if (userProfession == 'Coach') ...[
-              // Coach-specific menu options
               ListTile(
                 leading: Icon(Icons.dashboard),
                 title: Text('Dashboard'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => CoachDashboardPage()), // Replace with actual coach dashboard page
+                    MaterialPageRoute(builder: (context) => CoachDashboardPage()),
                   );
                 },
               ),
@@ -165,20 +153,18 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 leading: Icon(Icons.group),
                 title: Text('Manage Athletes'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  // Navigate to Athlete Management
+                  Navigator.pop(context);
                 },
               ),
             ] else if (userProfession == 'Organization') ...[
-              // Organization-specific menu options
               ListTile(
                 leading: Icon(Icons.dashboard),
                 title: Text('Dashboard'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => OrganizationDashboardPage()), // Replace with actual organization dashboard page
+                    MaterialPageRoute(builder: (context) => OrganizationDashboardPage()),
                   );
                 },
               ),
@@ -186,17 +172,39 @@ class _DrawerMenuState extends State<DrawerMenu> {
                 leading: Icon(Icons.people),
                 title: Text('Manage Coaches and Athletes'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
-                  // Navigate to Coach and Athlete Management
+                  Navigator.pop(context);
+                },
+              ),
+            ] else if (userProfession == 'Dietitian') ...[
+              // Dietitian-specific options
+              ListTile(
+                leading: Icon(Icons.emoji_food_beverage,
+                    color: Colors.green), // Icon for Nutrition
+                title: Text('Nutrition Plan Management'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.assessment, color: Colors.green),
+                title: Text('Athlete Progress Reports'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.bar_chart, color: Colors.green),
+                title: Text('Diet Analytics'),
+                onTap: () {
+                  Navigator.pop(context);
                 },
               ),
             ] else ...[
-              // For any other role, show the default options
               ListTile(
                 leading: Icon(Icons.dashboard),
                 title: Text('Dashboard'),
                 onTap: () {
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                 },
               ),
             ],
@@ -204,7 +212,7 @@ class _DrawerMenuState extends State<DrawerMenu> {
               leading: Icon(Icons.person),
               title: Text('Profile'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileScreen()),

@@ -119,30 +119,27 @@ class _MessageScreenState extends State<MessageScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
-        title: isSearching ? Text('Searching...') : Text('Messages', style: TextStyle(color: Colors.black)),
+        elevation: 1,
+        title: isSearching
+            ? Text('Searching...', style: TextStyle(color: Colors.black))
+            : Text('Messages', style: TextStyle(color: Colors.black)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(  // Make the body scrollable
+      body: SingleChildScrollView(
         child: Container(
           color: isSearching ? Colors.white : Colors.grey[100],
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Search bar
               _buildSearchBar(),
               SizedBox(height: 20),
-              // Display recent chats if any
               if (recentChats.isNotEmpty) _buildRecentChats(),
               SizedBox(height: 10),
               if (isSearching) _buildSearchResults(),
-              if (!isSearching)
-                Center(
-                  child: Text('Search for a person by name'),
-                ),
+              if (!isSearching) Center(child: Text('Search for a person by name')),
             ],
           ),
         ),
@@ -156,6 +153,9 @@ class _MessageScreenState extends State<MessageScreen> {
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(color: Colors.black12, blurRadius: 6, spreadRadius: 2)
+        ],
       ),
       child: TextField(
         controller: _searchController,
@@ -164,7 +164,17 @@ class _MessageScreenState extends State<MessageScreen> {
           hintText: 'Search for a person...',
           hintStyle: TextStyle(color: Colors.black54),
           border: InputBorder.none,
-          suffixIcon: Icon(Icons.search, color: Colors.black),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear, color: Colors.black54),
+            onPressed: () {
+              _searchController.clear();
+              setState(() {
+                searchQuery = '';
+                isSearching = false;
+                searchResults = [];
+              });
+            },
+          ),
         ),
       ),
     );
@@ -174,7 +184,7 @@ class _MessageScreenState extends State<MessageScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Recent Chats', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text('Recent Chats', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         SizedBox(height: 10),
         ListView.builder(
           shrinkWrap: true,
@@ -188,7 +198,9 @@ class _MessageScreenState extends State<MessageScreen> {
             return ListTile(
               contentPadding: EdgeInsets.symmetric(vertical: 8.0),
               leading: CircleAvatar(
+                radius: 30,
                 backgroundImage: AssetImage('assets/profile.jpg'),
+                backgroundColor: Colors.grey[300],
               ),
               title: Text(user['name'] ?? 'No Name', style: TextStyle(fontWeight: FontWeight.w600)),
               subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
@@ -203,8 +215,6 @@ class _MessageScreenState extends State<MessageScreen> {
                       ),
                     ),
                   );
-                } else {
-                  print('Error: Missing userId or name');
                 }
               },
             );
@@ -231,7 +241,9 @@ class _MessageScreenState extends State<MessageScreen> {
         return ListTile(
           contentPadding: EdgeInsets.symmetric(vertical: 8.0),
           leading: CircleAvatar(
+            radius: 30,
             backgroundImage: AssetImage('assets/profile.jpg'),
+            backgroundColor: Colors.grey[300],
           ),
           title: Text(user['name'] ?? 'No Name', style: TextStyle(fontWeight: FontWeight.w600)),
           subtitle: Text(subtitle, style: TextStyle(color: Colors.grey[600])),
@@ -246,8 +258,6 @@ class _MessageScreenState extends State<MessageScreen> {
                   ),
                 ),
               );
-            } else {
-              print('Error: Missing userId or name');
             }
           },
         );

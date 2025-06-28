@@ -6,7 +6,7 @@
 ## 🚀 Features
 
 ### 🔐 Authentication & Role-Based Access
-- Secure **Login & Signup** using Firebase Authentication.
+- Secure **Login & Signup** using Firebase Authentication (Email and Password).
 - **Role-based access** for different users:
     - **Athletes** – Manage performance, injuries, and career growth.
     - **Coaches** – Track athletes’ progress and set goals.

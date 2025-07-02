@@ -82,6 +82,7 @@ This project uses Firebase services. To set up Firebase for development:
 2. Financial management tools for athletes
 3. AI-based career planning and analytics
 4. Mobile & web compatibility
+5. Socket.io Integration
 
 ### 📜 License: This project is licensed under the MIT License.
 

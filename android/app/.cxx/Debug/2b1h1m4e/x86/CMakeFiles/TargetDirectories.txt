@@ -1,2 +1,0 @@
-D:/Solutions Challenge/Git check 2/athletix/android/app/.cxx/Debug/2b1h1m4e/x86/CMakeFiles/edit_cache.dir
-D:/Solutions Challenge/Git check 2/athletix/android/app/.cxx/Debug/2b1h1m4e/x86/CMakeFiles/rebuild_cache.dir

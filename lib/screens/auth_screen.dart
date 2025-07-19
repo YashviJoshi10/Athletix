@@ -77,7 +77,10 @@ class _AuthScreenState extends State<AuthScreen> {
           child: Column(
             children: [
               const SizedBox(height: 30),
-              const Icon(Icons.sports_volleyball, size: 80, color: Colors.blue),
+              Image.asset(
+                'assets/applogo.png',
+                height: 80,
+              ),
               const SizedBox(height: 16),
               Text(
                 isLogin ? 'Welcome Back' : 'Create an Account',

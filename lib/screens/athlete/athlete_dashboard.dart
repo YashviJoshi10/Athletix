@@ -9,6 +9,7 @@ import 'performance_logs_screen.dart';
 import 'calendar_screen.dart';
 import 'tournaments_screen.dart';
 import '../profile_screen.dart';
+import '../../components/fcm_listener.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,15 +30,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
       const ProfileScreen(),
     ];
 
-    return Scaffold(
-      body: screens[_currentIndex],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+    return FcmListener(
+      child: Scaffold(
+        body: screens[_currentIndex],
+        bottomNavigationBar: BottomNavBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+        ),
       ),
     );
   }

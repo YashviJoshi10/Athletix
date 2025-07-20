@@ -59,7 +59,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 },
                 child: Text(startTime == null
                     ? "Select Start Time"
-                    : "Start: ${startTime.toString()}"),
+                    : "Start: $startTime"),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
@@ -90,7 +90,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 },
                 child: Text(endTime == null
                     ? "Select End Time"
-                    : "End: ${endTime.toString()}"),
+                    : "End: $endTime"),
               ),
             ],
           ),
@@ -108,8 +108,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 await FirebaseFirestore.instance.collection('timetables').add({
                   'uid': uid,
                   'work': workController.text,
-                  'startTime': Timestamp.fromDate(startTime!),
-                  'endTime': Timestamp.fromDate(endTime!),
+                  'startTime': Timestamp.fromDate(startTime!.toUtc()),
+                  'endTime': Timestamp.fromDate(endTime!.toUtc()),
                   'createdAt': Timestamp.now(),
                   'notified': false,
                 });
@@ -133,9 +133,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             focusedDay: selectedDay,
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
-            selectedDayPredicate: (day) {
-              return isSameDay(selectedDay, day);
-            },
+            selectedDayPredicate: (day) => isSameDay(selectedDay, day),
             onDaySelected: (selected, focused) {
               setState(() {
                 selectedDay = selected;
@@ -150,41 +148,41 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   .where(
                 'startTime',
                 isGreaterThanOrEqualTo: Timestamp.fromDate(
-                  DateTime(selectedDay.year, selectedDay.month, selectedDay.day),
+                  DateTime.now().toUtc(),
                 ),
               )
                   .where(
                 'startTime',
                 isLessThan: Timestamp.fromDate(
-                  DateTime(selectedDay.year, selectedDay.month, selectedDay.day + 1),
+                  DateTime.utc(selectedDay.year, selectedDay.month, selectedDay.day + 1),
                 ),
               )
                   .orderBy('startTime')
                   .snapshots(),
-                builder: (ctx, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text("No activities added for this day."));
-                  }
-
-                  final docs = snapshot.data!.docs;
-
-                  return ListView.builder(
-                    itemCount: docs.length,
-                    itemBuilder: (ctx, index) {
-                      final data = docs[index].data() as Map<String, dynamic>;
-                      return ListTile(
-                        title: Text(data['work']),
-                        subtitle: Text(
-                          "${(data['startTime'] as Timestamp).toDate()} → ${(data['endTime'] as Timestamp).toDate()}",
-                        ),
-                      );
-                    },
-                  );
+              builder: (ctx, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
                 }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("No upcoming activities for this day."));
+                }
+
+                final docs = snapshot.data!.docs;
+
+                return ListView.builder(
+                  itemCount: docs.length,
+                  itemBuilder: (ctx, index) {
+                    final data = docs[index].data() as Map<String, dynamic>;
+                    return ListTile(
+                      title: Text(data['work']),
+                      subtitle: Text(
+                        "${(data['startTime'] as Timestamp).toDate()} → ${(data['endTime'] as Timestamp).toDate()}",
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           )
         ],

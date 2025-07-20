@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'athlete/dashboard_screen.dart';
+import 'athlete/athlete_dashboard.dart';
+import 'coach/coach_dashboard.dart';
+import 'doctor/doctor_dashboard.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -22,10 +24,14 @@ class _AuthScreenState extends State<AuthScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
+  final List<String> roles = ['Athlete', 'Coach', 'Doctor'];
+  String selectedRole = 'Athlete';
+
   void toggle(bool login) => setState(() => isLogin = login);
 
   Future<void> handleAuth() async {
-    if (!isLogin && (dob == null || _nameController.text.isEmpty || _sportController.text.isEmpty)) {
+    if (!isLogin &&
+        (dob == null || _nameController.text.isEmpty || _sportController.text.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
       );
@@ -33,13 +39,14 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     try {
+      UserCredential userCredential;
       if (isLogin) {
-        await _auth.signInWithEmailAndPassword(
+        userCredential = await _auth.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
       } else {
-        final userCredential = await _auth.createUserWithEmailAndPassword(
+        userCredential = await _auth.createUserWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -49,13 +56,39 @@ class _AuthScreenState extends State<AuthScreen> {
           'sport': _sportController.text,
           'dob': dob!.toIso8601String(),
           'email': _emailController.text,
+          'role': selectedRole,
           'createdAt': Timestamp.now(),
         });
       }
 
+      // fetch role
+      final doc =
+      await _firestore.collection('athletes').doc(userCredential.user!.uid).get();
+      final data = doc.data();
+      if (data == null || data['role'] == null) {
+        throw Exception("User role not found");
+      }
+
+      final role = data['role'] as String;
+      Widget targetScreen;
+
+      switch (role) {
+        case 'Athlete':
+          targetScreen = const DashboardScreen();
+          break;
+        case 'Coach':
+          targetScreen = const CoachDashboardScreen();
+          break;
+        case 'Doctor':
+          targetScreen = const DoctorDashboardScreen();
+          break;
+        default:
+          targetScreen = const DashboardScreen();
+      }
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => targetScreen),
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -154,6 +187,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 20),
                     if (!isLogin) ...[
+                      // FULL NAME
                       TextField(
                         controller: _nameController,
                         decoration: const InputDecoration(
@@ -162,15 +196,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      TextField(
-                        controller: _sportController,
-                        decoration: const InputDecoration(
-                          labelText: "Sport",
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
 
+                      // DOB
                       GestureDetector(
                         onTap: () async {
                           final picked = await showDatePicker(
@@ -198,9 +225,41 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 12),
 
+                      // ROLE
+                      DropdownButtonFormField<String>(
+                        value: selectedRole,
+                        items: roles
+                            .map((role) => DropdownMenuItem(
+                          value: role,
+                          child: Text(role),
+                        ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRole = value!;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          labelText: "Role",
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // SPORT/SPECIALIZATION
+                      TextField(
+                        controller: _sportController,
+                        decoration: InputDecoration(
+                          labelText: (selectedRole == 'Doctor') ? "Specialization" : "Sport",
+                          border: const OutlineInputBorder(),
+                        ),
+                      ),
                       const SizedBox(height: 12),
                     ],
+
+                    // EMAIL
                     TextField(
                       controller: _emailController,
                       decoration: const InputDecoration(
@@ -209,6 +268,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
+
+                    // PASSWORD
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
@@ -218,6 +279,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(

@@ -1,8 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+
 import 'auth_screen.dart';
-import 'athlete/dashboard_screen.dart';
+import 'athlete/athlete_dashboard.dart';
+import 'coach/coach_dashboard.dart';
+import 'doctor/doctor_dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,17 +30,48 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     });
   }
 
-  void _navigate() {
+  Future<void> _navigate() async {
     final user = FirebaseAuth.instance.currentUser;
+
     if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      );
+      try {
+        final doc = await FirebaseFirestore.instance.collection('athletes').doc(user.uid).get();
+        final data = doc.data();
+        if (data == null || data['role'] == null) {
+          throw Exception("User role not found");
+        }
+
+        final role = data['role'] as String;
+        Widget targetScreen;
+
+        switch (role) {
+          case 'Athlete':
+            targetScreen = const DashboardScreen();
+            break;
+          case 'Coach':
+            targetScreen = const CoachDashboardScreen();
+            break;
+          case 'Doctor':
+            targetScreen = const DoctorDashboardScreen();
+            break;
+          default:
+            targetScreen = const AuthScreen();
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => targetScreen),
+        );
+      } catch (e) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const AuthScreen()),
+        );
+      }
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const AuthScreen()),
+        MaterialPageRoute(builder: (_) => const AuthScreen()),
       );
     }
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'athlete/athlete_dashboard.dart';
 import 'coach/coach_dashboard.dart';
 import 'doctor/doctor_dashboard.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -51,7 +52,7 @@ class _AuthScreenState extends State<AuthScreen> {
           password: _passwordController.text,
         );
 
-        await _firestore.collection('athletes').doc(userCredential.user!.uid).set({
+        await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'name': _nameController.text,
           'sport': _sportController.text,
           'dob': dob!.toIso8601String(),
@@ -63,7 +64,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
       // fetch role
       final doc =
-      await _firestore.collection('athletes').doc(userCredential.user!.uid).get();
+      await _firestore.collection('users').doc(userCredential.user!.uid).get();
       final data = doc.data();
       if (data == null || data['role'] == null) {
         throw Exception("User role not found");
@@ -85,7 +86,7 @@ class _AuthScreenState extends State<AuthScreen> {
         default:
           targetScreen = const DashboardScreen();
       }
-
+      await saveFcmToken();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => targetScreen),
@@ -95,6 +96,30 @@ class _AuthScreenState extends State<AuthScreen> {
         SnackBar(content: Text(e.message ?? "Error")),
       );
     }
+  }
+
+  Future<void> saveFcmToken() async {
+    await FirebaseMessaging.instance.requestPermission(); // 🪄 Ask permission
+
+    final token = await FirebaseMessaging.instance.getToken();
+    debugPrint('FCM Token: $token');
+
+    if (token == null) {
+      debugPrint('Failed to get FCM token');
+      return;
+    }
+
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      debugPrint('No user logged in');
+      return;
+    }
+
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'fcmToken': token,
+    }, SetOptions(merge: true));
+
+    debugPrint('FCM Token saved to Firestore');
   }
 
   @override

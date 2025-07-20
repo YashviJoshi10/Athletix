@@ -145,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<DocumentSnapshot<Map<String, dynamic>>> _getUserData() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    return await FirebaseFirestore.instance.collection('athletes').doc(uid).get();
+    return await FirebaseFirestore.instance.collection('users').doc(uid).get();
   }
 
   Widget _buildActionCard(BuildContext context,

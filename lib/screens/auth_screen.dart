@@ -274,11 +274,35 @@ class _AuthScreenState extends State<AuthScreen> {
                       const SizedBox(height: 12),
 
                       // SPORT/SPECIALIZATION
-                      TextField(
+                      (selectedRole == 'Doctor')
+                          ? TextField(
                         controller: _sportController,
-                        decoration: InputDecoration(
-                          labelText: (selectedRole == 'Doctor') ? "Specialization" : "Sport",
-                          border: const OutlineInputBorder(),
+                        decoration: const InputDecoration(
+                          labelText: "Specialization",
+                          border: OutlineInputBorder(),
+                        ),
+                      )
+                          : DropdownButtonFormField<String>(
+                        value: _sportController.text.isNotEmpty ? _sportController.text : null,
+                        items: [
+                          'Football (Soccer)',
+                          'Basketball',
+                          'Cricket',
+                          'Tennis',
+                          'Athletics',
+                          'Swimming',
+                        ].map((sport) => DropdownMenuItem(
+                          value: sport,
+                          child: Text(sport),
+                        )).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _sportController.text = value ?? '';
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          labelText: "Sport",
+                          border: OutlineInputBorder(),
                         ),
                       ),
                       const SizedBox(height: 12),

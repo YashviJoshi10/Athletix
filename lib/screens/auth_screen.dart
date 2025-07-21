@@ -21,6 +21,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _sportController = TextEditingController();
+  final _dobController = TextEditingController();
   DateTime? dob;
 
   final _auth = FirebaseAuth.instance;
@@ -238,18 +239,17 @@ class _AuthScreenState extends State<AuthScreen> {
                           if (picked != null) {
                             setState(() {
                               dob = picked;
+                              _dobController.text = "${dob!.toLocal().toString().split(' ')[0]}";
                             });
                           }
                         },
                         child: AbsorbPointer(
                           child: TextField(
-                            decoration: InputDecoration(
+                            controller: _dobController,
+                            decoration: const InputDecoration(
                               labelText: "Date of Birth",
-                              hintText: dob == null
-                                  ? "Select Date of Birth"
-                                  : "${dob!.toLocal().toString().split(' ')[0]}",
-                              border: const OutlineInputBorder(),
-                              suffixIcon: const Icon(Icons.calendar_today),
+                              border: OutlineInputBorder(),
+                              suffixIcon: Icon(Icons.calendar_today),
                             ),
                           ),
                         ),

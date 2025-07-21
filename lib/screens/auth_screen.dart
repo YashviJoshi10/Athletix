@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'athlete/athlete_dashboard.dart';
 import 'coach/coach_dashboard.dart';
 import 'doctor/doctor_dashboard.dart';
+import 'organization/organization_dashboard.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -82,6 +83,9 @@ class _AuthScreenState extends State<AuthScreen> {
           break;
         case 'Doctor':
           targetScreen = const DoctorDashboardScreen();
+          break;
+        case 'Organization':
+          targetScreen = const OrganizationDashboardScreen();
           break;
         default:
           targetScreen = const DashboardScreen();
@@ -285,7 +289,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           : DropdownButtonFormField<String>(
                         value: _sportController.text.isNotEmpty ? _sportController.text : null,
                         items: [
-                          'Football (Soccer)',
+                          'Football',
                           'Basketball',
                           'Cricket',
                           'Tennis',

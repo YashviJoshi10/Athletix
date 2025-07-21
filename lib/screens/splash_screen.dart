@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-
+import 'organization/organization_dashboard.dart';
 import 'auth_screen.dart';
 import 'athlete/athlete_dashboard.dart';
 import 'coach/coach_dashboard.dart';
@@ -53,6 +53,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             break;
           case 'Doctor':
             targetScreen = const DoctorDashboardScreen();
+            break;
+          case 'Organization':
+            targetScreen = const OrganizationDashboardScreen();
             break;
           default:
             targetScreen = const AuthScreen();

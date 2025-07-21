@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class TournamentsScreen extends StatefulWidget {
   const TournamentsScreen({super.key});
@@ -19,8 +20,20 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   }
 
   Future<List<Tournament>> _fetchTournaments() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+
+    // get user document
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
+
+    final userSport = userDoc['sport'] ?? '';
+
+    // fetch tournaments of this sport
     final snapshot = await FirebaseFirestore.instance
         .collection('tournaments')
+        .where('sport', isEqualTo: userSport)
         .orderBy('createdAt', descending: true)
         .get();
 

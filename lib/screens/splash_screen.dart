@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
     if (user != null) {
       try {
-        final doc = await FirebaseFirestore.instance.collection('athletes').doc(user.uid).get();
+        final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
         final data = doc.data();
         if (data == null || data['role'] == null) {
           throw Exception("User role not found");

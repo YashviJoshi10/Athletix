@@ -22,19 +22,21 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
   Future<List<Tournament>> _fetchTournaments() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    // get user document
+    // Get user document
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .get();
 
     final userSport = userDoc['sport'] ?? '';
+    final now = Timestamp.now(); // current timestamp
 
-    // fetch tournaments of this sport
+    // Fetch ONLY upcoming tournaments for the user's sport
     final snapshot = await FirebaseFirestore.instance
         .collection('tournaments')
         .where('sport', isEqualTo: userSport)
-        .orderBy('createdAt', descending: true)
+        .where('date', isGreaterThanOrEqualTo: now)
+        .orderBy('date')
         .get();
 
     return snapshot.docs.map((doc) => Tournament.fromDocument(doc)).toList();
@@ -57,26 +59,51 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
 
           final tournaments = snapshot.data ?? [];
 
-          if (tournaments.isEmpty) {
-            return const Center(child: Text('No tournaments found.'));
-          }
+          final CameraPosition initialCameraPosition = tournaments.isNotEmpty
+              ? CameraPosition(
+            target: LatLng(tournaments.first.lat, tournaments.first.lng),
+            zoom: 10,
+          )
+              : const CameraPosition(
+            target: LatLng(20.5937, 78.9629), // Default location (e.g., India)
+            zoom: 4,
+          );
 
-          return GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(tournaments.first.lat, tournaments.first.lng),
-              zoom: 10,
-            ),
-            myLocationEnabled: true,            // ✅ shows your blue dot
-            myLocationButtonEnabled: true,     // ✅ shows button to center on your location
-            markers: tournaments
-                .map((tournament) => Marker(
-              markerId: MarkerId(tournament.id),
-              position: LatLng(tournament.lat, tournament.lng),
-              onTap: () {
-                _showTournamentDialog(context, tournament);
-              },
-            ))
-                .toSet(),
+          return Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: initialCameraPosition,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: true,
+                markers: tournaments
+                    .map((tournament) => Marker(
+                  markerId: MarkerId(tournament.id),
+                  position: LatLng(tournament.lat, tournament.lng),
+                  onTap: () {
+                    _showTournamentDialog(context, tournament);
+                  },
+                ))
+                    .toSet(),
+              ),
+
+              if (tournaments.isEmpty)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: double.infinity,
+                    color: Colors.red.withOpacity(0.8),
+                    padding: const EdgeInsets.all(12),
+                    child: const Text(
+                      'No tournaments found.',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           );
         },
       ),

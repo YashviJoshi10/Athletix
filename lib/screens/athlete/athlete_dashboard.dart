@@ -40,6 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _currentIndex = index;
             });
           },
+          role: 'Athlete', // 👈 Pass role here
         ),
       ),
     );

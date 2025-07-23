@@ -55,9 +55,8 @@
 
 ### ✅ Prerequisites
 
-
+- [Flutter Docs](https://docs.flutter.dev)
 - [Git](https://git-scm.com/downloads)
-- [Firebase CLI](https://firebase.google.com/docs/cli) – `npm install -g firebase-tools`
 - A physical Android device (recommended)
 
 ---

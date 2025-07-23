@@ -26,6 +26,7 @@ Thanks for contributing to Athletix! Please complete the following to help us re
 
 Closes #<issue_number>  
 Linked to #<issue_number> (if applicable)
+Fixes #<<issue_number>>
 
 ---
 

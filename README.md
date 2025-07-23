@@ -55,7 +55,7 @@
 
 ### ✅ Prerequisites
 
-- [Flutter Docs](https://docs.flutter.dev)
+- [Flutter SDK](https://docs.flutter.dev/get-started/install)
 - [Git](https://git-scm.com/downloads)
 - A physical Android device (recommended)
 

@@ -1,3 +1,4 @@
+
 # Don't forget to star our repository
 
 # 🏋️ Athletix
@@ -82,6 +83,7 @@ flutter run
 
 > 📱 **Tip**: It's recommended to use a physical Android device for better performance during development.
 
+---
 
 ### 🧱 Tech Stack
 

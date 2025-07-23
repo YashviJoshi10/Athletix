@@ -6,7 +6,7 @@ Thanks for contributing to Athletix! Please complete the following to help us re
 
 ## 🔖 Type of Change
 
-<!-- Select one or more -->
+<!-- Select one or more options-->
 - [ ] 🚀 Feature – New functionality
 - [ ] 🐛 Fix – Bug fix
 - [ ] 🧹 Refactor – Code clean-up (no new features)

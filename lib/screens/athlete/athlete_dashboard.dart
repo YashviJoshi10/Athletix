@@ -40,7 +40,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _currentIndex = index;
             });
           },
-          role: 'Athlete', // 👈 Pass role here
+          role: 'Athlete',
         ),
       ),
     );
@@ -85,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           final dob = data['dob']?.toString().split('T').first ?? '';
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32), // bottom padding added
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -110,7 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 1.2,
+                    childAspectRatio: 1.1, // adjusted from 1.2 to reduce overflow
                   ),
                   children: [
                     _buildActionCard(
@@ -152,11 +152,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return await FirebaseFirestore.instance.collection('users').doc(uid).get();
   }
 
-  Widget _buildActionCard(BuildContext context,
-      {required IconData icon,
+  Widget _buildActionCard(
+      BuildContext context, {
+        required IconData icon,
         required String label,
         required Color color,
-        required VoidCallback onTap}) {
+        required VoidCallback onTap,
+      }) {
     return GestureDetector(
       onTap: onTap,
       child: Card(
@@ -166,15 +168,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
             borderRadius: BorderRadius.circular(12),
             color: Colors.white,
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: color),
-              const SizedBox(height: 10),
-              Text(label,
+              Icon(icon, size: 36, color: color), // reduced icon size
+              const SizedBox(height: 8),
+              Flexible(
+                child: Text(
+                  label,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14, // slightly reduced font size
+                  ),
+                ),
+              ),
             ],
           ),
         ),

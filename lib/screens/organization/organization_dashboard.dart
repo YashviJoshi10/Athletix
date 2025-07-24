@@ -1,3 +1,4 @@
+import 'package:athletix/screens/privacy_terms_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -131,6 +132,28 @@ class _OrganizationDashboardScreenState extends State<OrganizationDashboardScree
                       },
                     ),
                   ],
+                ),
+                const SizedBox(height: 30), // spacing before the button
+                // Privacy Policy & Terms Navigation Button
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacyTermsPage(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Privacy Policy & Terms',
+                      style: TextStyle(
+                        color: Colors.blue,
+                        fontSize: 14,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

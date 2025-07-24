@@ -131,10 +131,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       label: "Performance Logs",
                       color: Colors.green,
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const PerformanceLogScreen()),
-                        );
+                        Navigator.pushNamed(context, '/performance-logs');
                       },
                     ),
                   ],

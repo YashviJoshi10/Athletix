@@ -10,7 +10,6 @@ import 'calendar_screen.dart';
 import 'tournaments_screen.dart';
 import '../profile_screen.dart';
 import '../../components/fcm_listener.dart';
-import '../privacy_terms_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -152,28 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 30), // spacing before the button
-                // Privacy Policy & Terms Navigation Button
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const PrivacyTermsPage(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Privacy Policy & Terms',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ),
+               
               ],
             ),
           );

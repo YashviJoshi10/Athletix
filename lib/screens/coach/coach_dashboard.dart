@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../auth_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../privacy_terms_screen.dart'; // Import the PrivacyTermsPage class
+
 
 class CoachDashboardScreen extends StatelessWidget {
   const CoachDashboardScreen({super.key});
@@ -28,28 +28,6 @@ class CoachDashboardScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('Welcome, Coach!', style: TextStyle(fontSize: 20)),
-          const SizedBox(height: 30), // spacing before the button
-          // Privacy Policy & Terms Navigation Button
-          Center(
-            child: TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const PrivacyTermsPage(),
-                  ),
-                );
-              },
-              child: const Text(
-                'Privacy Policy & Terms',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

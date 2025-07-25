@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../auth_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class DoctorDashboardScreen extends StatelessWidget {
   const DoctorDashboardScreen({super.key});
 
@@ -23,8 +24,14 @@ class DoctorDashboardScreen extends StatelessWidget {
           )
         ],
       ),
-      body: const Center(
-        child: Text('Welcome, Doctor!', style: TextStyle(fontSize: 20)),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Center(
+            child: Text('Welcome, Doctor!', style: TextStyle(fontSize: 20)),
+          ),
+         
+        ],
       ),
     );
   }

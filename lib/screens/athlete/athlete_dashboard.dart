@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/bottom_nav_bar.dart';
-import '../auth_screen.dart';
 import 'injury_tracker_screen.dart';
 import 'performance_logs_screen.dart';
 import 'calendar_screen.dart';

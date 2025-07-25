@@ -1,8 +1,5 @@
 import 'package:athletix/components/alertDialog_signOut_confitmation.dart';
 import 'package:flutter/material.dart';
-import '../auth_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 
 class DoctorDashboardScreen extends StatelessWidget {
   const DoctorDashboardScreen({super.key});

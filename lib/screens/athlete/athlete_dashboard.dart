@@ -1,9 +1,9 @@
+import 'package:athletix/components/alertDialog_signOut_confitmation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/bottom_nav_bar.dart';
-import '../auth_screen.dart';
 import 'injury_tracker_screen.dart';
 import 'performance_logs_screen.dart';
 import 'calendar_screen.dart';
@@ -56,13 +56,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         title: const Text('Dashboard', style: TextStyle(color: Colors.black)),
         actions: [
           IconButton(
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const AuthScreen()),
-              );
+           
+              onPressed: () async {
+              await signoutConfirmation(context);
             },
+            
             icon: const Icon(Icons.logout, color: Colors.red),
           ),
         ],

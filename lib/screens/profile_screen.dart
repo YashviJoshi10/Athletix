@@ -1,9 +1,9 @@
+import 'package:athletix/components/alertDialog_signOut_confitmation.dart';
 import 'package:athletix/screens/privacy_terms_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import './auth_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -23,11 +23,7 @@ class ProfileScreen extends StatelessWidget {
             icon: const Icon(Icons.logout, color: Colors.red), // 🔴 Red icon
             tooltip: 'Logout',
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const AuthScreen()),
-              );
+              await signoutConfirmation(context);
             },
           ),
         ],

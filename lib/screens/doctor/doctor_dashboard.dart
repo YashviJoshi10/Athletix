@@ -1,7 +1,5 @@
+import 'package:athletix/components/alertDialog_signOut_confitmation.dart';
 import 'package:flutter/material.dart';
-import '../auth_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 
 class DoctorDashboardScreen extends StatelessWidget {
   const DoctorDashboardScreen({super.key});
@@ -14,12 +12,9 @@ class DoctorDashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.red),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const AuthScreen()),
-              );
+           onPressed: () async {
+              await signoutConfirmation(context);
+              
             },
           )
         ],

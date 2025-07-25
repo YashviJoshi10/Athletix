@@ -16,6 +16,8 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
 
   final _injuryController = TextEditingController();
   final _notesController = TextEditingController();
+  final _dateController = TextEditingController(); // Date controller
+
   DateTime? _injuryDate;
   bool _isLoading = false;
 
@@ -25,6 +27,7 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
   void _clearForm() {
     _injuryController.clear();
     _notesController.clear();
+    _dateController.clear();
     setState(() {
       _injuryDate = null;
     });
@@ -65,8 +68,7 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text("Delete Injury"),
-        content:
-        const Text("Are you sure you want to delete this injury entry?"),
+        content: const Text("Are you sure you want to delete this injury entry?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -95,6 +97,13 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
       ),
       builder: (context) {
         final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+        DateTime? modalInjuryDate = _injuryDate;
+        // Set initial text for date field for immediate display
+        _dateController.text = modalInjuryDate != null
+            ? DateFormat('yyyy-MM-dd').format(modalInjuryDate)
+            : '';
+
         return Padding(
           padding: EdgeInsets.only(
             bottom: bottomInset + 32,
@@ -107,20 +116,21 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
               Future<void> pickDate() async {
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.now(),
+                  initialDate: modalInjuryDate ?? DateTime.now(),
                   firstDate: DateTime(1950),
                   lastDate: DateTime.now(),
                 );
                 if (picked != null) {
                   setModalState(() {
-                    _injuryDate = picked;
+                    modalInjuryDate = picked;
+                    _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
                   });
-                  setState(() {});
+                  setState(() => _injuryDate = picked);
                 }
               }
 
               final isFormValid =
-                  _injuryController.text.trim().isNotEmpty && _injuryDate != null;
+                  _injuryController.text.trim().isNotEmpty && modalInjuryDate != null;
 
               return SingleChildScrollView(
                 child: Column(
@@ -145,20 +155,15 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
                       onChanged: (_) => setModalState(() {}),
                     ),
                     const SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: pickDate,
-                      child: AbsorbPointer(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            labelText: "Injury Date *",
-                            prefixIcon: const Icon(Icons.calendar_today),
-                            border: const OutlineInputBorder(),
-                            hintText: _injuryDate == null
-                                ? "Pick Date"
-                                : DateFormat('yyyy-MM-dd').format(_injuryDate!),
-                          ),
-                        ),
+                    TextField(
+                      controller: _dateController,
+                      decoration: const InputDecoration(
+                        labelText: "Injury Date *",
+                        prefixIcon: Icon(Icons.calendar_today),
+                        border: OutlineInputBorder(),
                       ),
+                      readOnly: true,
+                      onTap: pickDate,
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -181,8 +186,8 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
                               _clearForm();
                             },
                             style: OutlinedButton.styleFrom(
-                              side: const BorderSide(
-                                  color: Colors.grey, width: 1.3),
+                              side:
+                              const BorderSide(color: Colors.grey, width: 1.3),
                               backgroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
@@ -210,13 +215,11 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
                             style: OutlinedButton.styleFrom(
                               backgroundColor: Colors.white,
                               side: BorderSide(
-                                color: isFormValid
-                                    ? Color(0xFF1565C0)
-                                    : Colors.grey,
+                                color:
+                                isFormValid ? const Color(0xFF1565C0) : Colors.grey,
                                 width: 1.6,
                               ),
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
@@ -225,7 +228,7 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
                               'Add',
                               style: TextStyle(
                                 color: isFormValid
-                                    ? Color(0xFF1565C0)
+                                    ? const Color(0xFF1565C0)
                                     : Colors.grey,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -320,10 +323,11 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
-                child: Text(
-                  "No injuries logged yet.",
-                  style: TextStyle(fontSize: 16, color: Colors.black54),
-                ));
+              child: Text(
+                "No injuries logged yet.",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            );
           }
 
           final docs = snapshot.data!.docs;
@@ -344,9 +348,10 @@ class _InjuryTrackerScreenState extends State<InjuryTrackerScreen> {
         label: const Text(
           "Add Injury",
           style: TextStyle(
-              color: Color(0xFF1565C0),
-              fontWeight: FontWeight.bold,
-              fontSize: 16),
+            color: Color(0xFF1565C0),
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 6,

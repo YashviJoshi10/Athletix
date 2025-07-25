@@ -10,6 +10,7 @@ import 'calendar_screen.dart';
 import 'tournaments_screen.dart';
 import '../profile_screen.dart';
 import '../../components/fcm_listener.dart';
+import 'financial_tracker_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -52,10 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: const Text('Dashboard', style: TextStyle(color: Colors.black)),
         actions: [
           IconButton(
             onPressed: () async {
@@ -66,7 +64,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
             icon: const Icon(Icons.logout, color: Colors.red),
-          )
+          ),
         ],
       ),
       body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -90,17 +88,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   child: ListTile(
-                    leading: const Icon(Icons.person, color: Colors.blue, size: 40),
-                    title: Text(name, style: Theme.of(context).textTheme.titleMedium),
+                    leading: const Icon(
+                      Icons.person,
+                      color: Colors.blue,
+                      size: 40,
+                    ),
+                    title: Text(
+                      name,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     subtitle: Text("Sport: $sport\nDOB: $dob"),
                   ),
                 ),
                 const SizedBox(height: 20),
                 Text(
                   'Quick Actions',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 GridView(
@@ -121,7 +130,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const InjuryTrackerScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const InjuryTrackerScreen(),
+                          ),
                         );
                       },
                     ),
@@ -133,7 +144,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const PerformanceLogScreen()),
+                          MaterialPageRoute(
+                            builder: (_) => const PerformanceLogScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildActionCard(
+                      context,
+                      icon: Icons.account_balance_wallet,
+                      label: "Financial Tracker",
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FinancialTrackerPage(),
+                          ),
                         );
                       },
                     ),
@@ -152,11 +179,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return await FirebaseFirestore.instance.collection('users').doc(uid).get();
   }
 
-  Widget _buildActionCard(BuildContext context,
-      {required IconData icon,
-        required String label,
-        required Color color,
-        required VoidCallback onTap}) {
+  Widget _buildActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Card(
@@ -172,9 +201,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Icon(icon, size: 40, color: color),
               const SizedBox(height: 10),
-              Text(label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ],
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../auth_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 class CoachDashboardScreen extends StatelessWidget {
   const CoachDashboardScreen({super.key});
 
@@ -23,8 +24,11 @@ class CoachDashboardScreen extends StatelessWidget {
           )
         ],
       ),
-      body: const Center(
-        child: Text('Welcome, Coach!', style: TextStyle(fontSize: 20)),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Welcome, Coach!', style: TextStyle(fontSize: 20)),
+        ],
       ),
     );
   }

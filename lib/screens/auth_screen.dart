@@ -421,6 +421,7 @@ class _AuthScreenState extends State<AuthScreen> {
         await userCredential.user!.sendEmailVerification();
 
         setState(() {
+          isLoading = false;
           isEmailVerificationPending = true;
           pendingVerificationEmail = _emailController.text.trim();
         });

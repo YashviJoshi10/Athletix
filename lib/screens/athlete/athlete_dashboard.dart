@@ -10,6 +10,7 @@ import 'calendar_screen.dart';
 import 'tournaments_screen.dart';
 import '../profile_screen.dart';
 import '../../components/fcm_listener.dart';
+import 'financial_tracker_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -143,6 +144,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const PerformanceLogScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    _buildActionCard(
+                      context,
+                      icon: Icons.account_balance_wallet,
+                      label: "Financial Tracker",
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FinancialTrackerPage(),
                           ),
                         );
                       },

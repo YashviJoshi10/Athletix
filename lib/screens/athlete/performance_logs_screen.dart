@@ -17,6 +17,7 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
 
   final TextEditingController _activityController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
 
   DateTime? _logDate;
   bool _isLoading = false;
@@ -38,6 +39,7 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
   void dispose() {
     _activityController.dispose();
     _notesController.dispose();
+    _dateController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -48,6 +50,7 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
   void _clearForm() {
     _activityController.clear();
     _notesController.clear();
+    _dateController.clear();
     setState(() {
       _logDate = null;
     });
@@ -86,7 +89,8 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text("Delete Log"),
-        content: const Text("Are you sure you want to delete this performance log entry?"),
+        content:
+        const Text("Are you sure you want to delete this performance log entry?"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -116,6 +120,10 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
       builder: (context) {
         final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
+        DateTime? modalLogDate = _logDate;
+        _dateController.text =
+        modalLogDate != null ? DateFormat('yyyy-MM-dd').format(modalLogDate) : '';
+
         return Padding(
           padding: EdgeInsets.only(
             bottom: bottomInset + 20,
@@ -128,12 +136,18 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
               Future<void> pickDate() async {
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate: DateTime.now(),
+                  initialDate: modalLogDate ?? DateTime.now(),
                   firstDate: DateTime(1950),
                   lastDate: DateTime.now(),
                 );
                 if (picked != null) {
-                  setModalState(() => _logDate = picked);
+                  setModalState(() {
+                    modalLogDate = picked;
+                    _dateController.text = DateFormat('yyyy-MM-dd').format(picked);
+                  });
+                  setState(() {
+                    _logDate = picked;
+                  });
                 }
               }
 
@@ -143,10 +157,10 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
                   children: [
                     Text(
                       "Add Performance Log",
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                     const SizedBox(height: 20),
                     TextField(
@@ -159,20 +173,15 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
                       ),
                     ),
                     const SizedBox(height: 14),
-                    GestureDetector(
-                      onTap: pickDate,
-                      child: AbsorbPointer(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            labelText: "Date *",
-                            hintText: _logDate == null
-                                ? "Pick Date"
-                                : DateFormat('yyyy-MM-dd').format(_logDate!),
-                            prefixIcon: const Icon(Icons.calendar_today),
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
+                    TextField(
+                      controller: _dateController,
+                      decoration: const InputDecoration(
+                        labelText: "Date *",
+                        prefixIcon: Icon(Icons.calendar_today),
+                        border: OutlineInputBorder(),
                       ),
+                      readOnly: true,
+                      onTap: pickDate,
                     ),
                     const SizedBox(height: 14),
                     TextField(
@@ -244,6 +253,7 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen>
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
           onPressed: () => _deleteLog(doc.id),
+          tooltip: "Delete entry",
         ),
       ),
     );

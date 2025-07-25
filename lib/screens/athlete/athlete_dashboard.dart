@@ -52,10 +52,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(color: Colors.black),
-        ),
+        title: const Text('Dashboard', style: TextStyle(color: Colors.black)),
         actions: [
           IconButton(
             onPressed: () async {
@@ -66,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               );
             },
             icon: const Icon(Icons.logout, color: Colors.red),
-          )
+          ),
         ],
       ),
       body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
@@ -154,6 +151,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ],
                 ),
+               
               ],
             ),
           );

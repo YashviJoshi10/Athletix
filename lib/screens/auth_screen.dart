@@ -86,23 +86,38 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _checkInitialAuthState() async {
     final user = _auth.currentUser;
     if (user != null) {
-      // User is signed in, check if email is verified
-      await user.reload(); // Refresh user data
+      // User is signed in, check if user data exists in Firestore first
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+      if (!userDoc.exists) {
+        // User data doesn't exist in Firestore, sign out
+        await _auth.signOut();
+        debugPrint('User signed out due to missing Firestore data');
+        return;
+      }
+
+      final userData = userDoc.data()!;
+
+      // Check Firestore emailVerified status first (this allows manual override)
+      bool isEmailVerifiedInFirestore = userData['emailVerified'] == true;
+
+      // For organization role, prioritize Firestore verification status
+      if (userData['role'] == 'Organization' && isEmailVerifiedInFirestore) {
+        // Organization with manual verification - proceed directly
+        await _navigateBasedOnRole(user.uid);
+        return;
+      }
+
+      // For other roles, check both Firebase Auth and Firestore
+      await user.reload();
       final refreshedUser = _auth.currentUser;
 
-      if (refreshedUser != null && refreshedUser.emailVerified) {
-        // Email is verified, check if user data exists in Firestore
-        final userDoc = await _firestore.collection('users').doc(refreshedUser.uid).get();
-
-        if (!userDoc.exists) {
-          // User data doesn't exist in Firestore, sign out
-          await _auth.signOut();
-          debugPrint('User signed out due to missing Firestore data');
-          return;
+      if (refreshedUser != null && (refreshedUser.emailVerified || isEmailVerifiedInFirestore)) {
+        // Either Firebase Auth or Firestore shows verified status
+        if (!isEmailVerifiedInFirestore) {
+          // Update Firestore to match Firebase Auth status
+          await _updateEmailVerificationStatus(refreshedUser.uid, true);
         }
-
-        // Update verification status and navigate
-        await _updateEmailVerificationStatus(refreshedUser.uid, true);
         await _navigateBasedOnRole(refreshedUser.uid);
       } else {
         // Email is not verified, sign out the user
@@ -697,7 +712,25 @@ class _AuthScreenState extends State<AuthScreen> {
         password: _passwordController.text,
       );
 
-      // Reload user to get the latest verification status from Firebase
+      // Get user data from Firestore
+      final userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
+
+      if (!userDoc.exists) {
+        await _auth.signOut();
+        throw Exception('User data not found');
+      }
+
+      final userData = userDoc.data()!;
+      bool isEmailVerifiedInFirestore = userData['emailVerified'] == true;
+
+      // For organization role, prioritize Firestore verification status
+      if (userData['role'] == 'Organization' && isEmailVerifiedInFirestore) {
+        // Organization with manual verification - proceed directly
+        await _navigateBasedOnRole(userCredential.user!.uid);
+        return;
+      }
+
+      // For other roles, check Firebase Auth verification
       await userCredential.user!.reload();
       final refreshedUser = _auth.currentUser;
 
@@ -705,16 +738,18 @@ class _AuthScreenState extends State<AuthScreen> {
         throw Exception('User not found after login');
       }
 
-      // Check email verification status from Firebase Auth (most up-to-date)
-      if (!refreshedUser.emailVerified) {
+      // Check email verification status - use Firestore first, then Firebase Auth
+      if (!isEmailVerifiedInFirestore && !refreshedUser.emailVerified) {
         setState(() => isLoading = false);
         // Don't sign out - keep user signed in for verification
         _showVerificationRequiredDialog(email);
         return;
       }
 
-      // If email is verified in Firebase Auth, update Firestore status
-      await _updateEmailVerificationStatus(refreshedUser.uid, true);
+      // If either source shows verified, update both to be consistent
+      if (refreshedUser.emailVerified && !isEmailVerifiedInFirestore) {
+        await _updateEmailVerificationStatus(refreshedUser.uid, true);
+      }
 
       // Proceed to dashboard
       await _navigateBasedOnRole(refreshedUser.uid);

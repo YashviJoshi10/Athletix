@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:Athletix/features/performance_tracking/performance_chart.dart';
+import '../../features/performance_tracking/performance_chart.dart';
 
 class PerformanceLogScreen extends StatefulWidget {
   const PerformanceLogScreen({super.key});

@@ -13,14 +13,16 @@ class PerformanceForm extends StatefulWidget {
 class _PerformanceFormState extends State<PerformanceForm> {
   final _caloriesController = TextEditingController();
   final _durationController = TextEditingController();
+  final _notesController = TextEditingController(); // ✅ Added notes field
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final calories = int.tryParse(_caloriesController.text);
-    final duration = int.tryParse(_durationController.text);
+    final calories = double.tryParse(_caloriesController.text);
+    final duration = double.tryParse(_durationController.text);
+    final notes = _notesController.text.trim();
 
     if (calories == null || duration == null) return;
 
@@ -30,13 +32,19 @@ class _PerformanceFormState extends State<PerformanceForm> {
       await PerformanceController.saveDailyLog(
         calories: calories,
         duration: duration,
+        notes: notes.isEmpty ? null : notes,
+        date: DateTime.now().toIso8601String(), // ✅ Always store date
       );
+
       widget.onSubmit();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Performance data saved!")),
       );
+
+      // Clear all fields
       _caloriesController.clear();
       _durationController.clear();
+      _notesController.clear();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: ${e.toString()}")),
@@ -72,6 +80,15 @@ class _PerformanceFormState extends State<PerformanceForm> {
             keyboardType: TextInputType.number,
             validator: (val) =>
                 val == null || val.isEmpty ? 'Enter duration' : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _notesController,
+            decoration: const InputDecoration(
+              labelText: "Notes (optional)",
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.text,
           ),
           const SizedBox(height: 16),
           ElevatedButton(

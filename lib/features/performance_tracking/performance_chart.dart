@@ -15,9 +15,18 @@ class PerformanceChart extends StatelessWidget {
 
     for (int i = 0; i < logs.length; i++) {
       final log = logs[i];
-      caloriesSpots.add(FlSpot(i.toDouble(), log['calories_burned'].toDouble()));
-      durationSpots.add(FlSpot(i.toDouble(), log['workout_duration'].toDouble()));
-      dates.add(log['date']);
+
+      final calories = (log['calories'] ?? log['calories_burned']) ?? 0;
+      final duration = (log['duration'] ?? log['workout_duration']) ?? 0;
+      final date = log['date']?.toString() ?? DateTime.now().toIso8601String();
+
+      caloriesSpots.add(
+        FlSpot(i.toDouble(), (calories is num) ? calories.toDouble() : double.tryParse(calories.toString()) ?? 0.0),
+      );
+      durationSpots.add(
+        FlSpot(i.toDouble(), (duration is num) ? duration.toDouble() : double.tryParse(duration.toString()) ?? 0.0),
+      );
+      dates.add(date);
     }
 
     return SizedBox(
@@ -33,20 +42,24 @@ class PerformanceChart extends StatelessWidget {
                 getTitlesWidget: (value, meta) {
                   int index = value.toInt();
                   if (index >= 0 && index < dates.length) {
-                    return Text(DateFormat.Md().format(DateTime.parse(dates[index])));
+                    try {
+                      return Text(
+                        DateFormat.Md().format(DateTime.parse(dates[index])),
+                        style: const TextStyle(fontSize: 10),
+                      );
+                    } catch (e) {
+                      return const Text('');
+                    }
                   }
                   return const Text('');
                 },
               ),
             ),
             leftTitles: AxisTitles(
-              axisNameWidget: const Text("Calories"),
+              axisNameWidget: const Text("Calories / Duration"),
               sideTitles: SideTitles(showTitles: true),
             ),
-            rightTitles: AxisTitles(
-              axisNameWidget: const Text("Duration"),
-              sideTitles: SideTitles(showTitles: false),
-            ),
+            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
           ),
           lineBarsData: [
             LineChartBarData(

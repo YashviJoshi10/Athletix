@@ -13,7 +13,8 @@ class PerformanceController {
     if (uid == null) throw Exception('User not logged in');
 
     final today = DateTime.now();
-    final dateId = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+    final dateId =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
 
     await _firestore
         .collection('performance_logs')
@@ -21,8 +22,8 @@ class PerformanceController {
         .collection('logs')
         .doc(dateId)
         .set({
-      'calories_burned': calories,
-      'workout_duration': duration,
+      'calories': calories,
+      'duration': duration,
     });
   }
 
@@ -41,8 +42,8 @@ class PerformanceController {
       final data = doc.data();
       return {
         'date': doc.id,
-        'calories_burned': data['calories_burned'],
-        'workout_duration': data['workout_duration'],
+        'calories': data['calories'] ?? data['calories_burned'],
+        'duration': data['duration'] ?? data['workout_duration'],
       };
     }).toList();
   }

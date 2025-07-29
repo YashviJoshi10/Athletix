@@ -112,7 +112,8 @@ class _AuthScreenState extends State<AuthScreen> {
       await user.reload();
       final refreshedUser = _auth.currentUser;
 
-      if (refreshedUser != null && (refreshedUser.emailVerified || isEmailVerifiedInFirestore)) {
+      if (refreshedUser != null &&
+          (refreshedUser.emailVerified || isEmailVerifiedInFirestore)) {
         // Either Firebase Auth or Firestore shows verified status
         if (!isEmailVerifiedInFirestore) {
           // Update Firestore to match Firebase Auth status
@@ -173,7 +174,10 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   // Update email verification status in Firestore
-  Future<void> _updateEmailVerificationStatus(String uid, bool isVerified) async {
+  Future<void> _updateEmailVerificationStatus(
+    String uid,
+    bool isVerified,
+  ) async {
     await _firestore.collection('users').doc(uid).update({
       'emailVerified': isVerified,
     });
@@ -182,11 +186,12 @@ class _AuthScreenState extends State<AuthScreen> {
   // Check if user exists and get verification status from Firestore
   Future<Map<String, dynamic>?> _getUserData(String email) async {
     try {
-      final querySnapshot = await _firestore
-          .collection('users')
-          .where('email', isEqualTo: email)
-          .limit(1)
-          .get();
+      final querySnapshot =
+          await _firestore
+              .collection('users')
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.data();
@@ -200,7 +205,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // FIXED: Start checking for email verification with user signed in
   void _startEmailVerificationCheck() {
-    _emailVerificationTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+    _emailVerificationTimer = Timer.periodic(const Duration(seconds: 3), (
+      timer,
+    ) async {
       try {
         final user = _auth.currentUser;
         if (user == null) {
@@ -288,9 +295,9 @@ class _AuthScreenState extends State<AuthScreen> {
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Navigation error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Navigation error: $e')));
       }
     }
   }
@@ -299,18 +306,19 @@ class _AuthScreenState extends State<AuthScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Verify Your Email'),
-        content: Text(
-            'Account created successfully! A verification email has been sent to ${pendingVerificationEmail}. Please check your inbox and spam folder, then click the verification link to complete your registration.'
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Verify Your Email'),
+            content: Text(
+              'Account created successfully! A verification email has been sent to ${pendingVerificationEmail}. Please check your inbox and spam folder, then click the verification link to complete your registration.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -331,7 +339,9 @@ class _AuthScreenState extends State<AuthScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Verification email sent! Please check your inbox and spam folder.'),
+                content: Text(
+                  'Verification email sent! Please check your inbox and spam folder.',
+                ),
                 backgroundColor: Colors.green,
               ),
             );
@@ -359,16 +369,15 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) {
         String errorMessage = 'Error sending verification email';
         if (e.toString().contains('too-many-requests')) {
-          errorMessage = 'Too many requests. Please wait a moment before trying again.';
+          errorMessage =
+              'Too many requests. Please wait a moment before trying again.';
         } else if (e.toString().contains('network')) {
-          errorMessage = 'Network error. Please check your connection and try again.';
+          errorMessage =
+              'Network error. Please check your connection and try again.';
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -381,43 +390,48 @@ class _AuthScreenState extends State<AuthScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Email Verification Required'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.mark_email_unread,
-              color: Colors.orange,
-              size: 48,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Email Verification Required'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.mark_email_unread,
+                  color: Colors.orange,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'A verification email was sent to $email. Please check your inbox and spam folder, then verify your email to continue.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'A verification email was sent to $email. Please check your inbox and spam folder, then verify your email to continue.',
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: isResendingEmail ? null : () async {
-              Navigator.of(context).pop();
-              await _resendVerificationEmailForLogin(email);
-            },
-            child: isResendingEmail
-                ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-                : const Text('Resend Email'),
+            actions: [
+              TextButton(
+                onPressed:
+                    isResendingEmail
+                        ? null
+                        : () async {
+                          Navigator.of(context).pop();
+                          await _resendVerificationEmailForLogin(email);
+                        },
+                child:
+                    isResendingEmail
+                        ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Text('Resend Email'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -457,86 +471,96 @@ class _AuthScreenState extends State<AuthScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resend Verification Email'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Please enter your password to resend the verification email:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Resend Verification Email'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Please enter your password to resend the verification email:',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              passwordController.dispose();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                Navigator.of(context).pop();
-                setState(() => isResendingEmail = true);
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  passwordController.dispose();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    Navigator.of(context).pop();
+                    setState(() => isResendingEmail = true);
 
-                // Sign in to send verification email
-                UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-                  email: email,
-                  password: passwordController.text,
-                );
+                    // Sign in to send verification email
+                    UserCredential userCredential = await _auth
+                        .signInWithEmailAndPassword(
+                          email: email,
+                          password: passwordController.text,
+                        );
 
-                if (!userCredential.user!.emailVerified) {
-                  await userCredential.user!.sendEmailVerification();
-                  // Keep user signed in for verification checking
+                    if (!userCredential.user!.emailVerified) {
+                      await userCredential.user!.sendEmailVerification();
+                      // Keep user signed in for verification checking
 
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Verification email sent! Please check your inbox and spam folder.'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Verification email sent! Please check your inbox and spam folder.',
+                            ),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    } else {
+                      // User is already verified, proceed to dashboard
+                      await _updateEmailVerificationStatus(
+                        userCredential.user!.uid,
+                        true,
+                      );
+                      await _navigateBasedOnRole(userCredential.user!.uid);
+                    }
+                  } catch (e) {
+                    await _auth.signOut(); // Sign out on error
+                    if (mounted) {
+                      String errorMessage = 'Invalid password or network error';
+                      if (e.toString().contains('wrong-password')) {
+                        errorMessage = 'Incorrect password. Please try again.';
+                      } else if (e.toString().contains('too-many-requests')) {
+                        errorMessage =
+                            'Too many attempts. Please try again later.';
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } finally {
+                    setState(() => isResendingEmail = false);
+                    passwordController.dispose();
                   }
-                } else {
-                  // User is already verified, proceed to dashboard
-                  await _updateEmailVerificationStatus(userCredential.user!.uid, true);
-                  await _navigateBasedOnRole(userCredential.user!.uid);
-                }
-              } catch (e) {
-                await _auth.signOut(); // Sign out on error
-                if (mounted) {
-                  String errorMessage = 'Invalid password or network error';
-                  if (e.toString().contains('wrong-password')) {
-                    errorMessage = 'Incorrect password. Please try again.';
-                  } else if (e.toString().contains('too-many-requests')) {
-                    errorMessage = 'Too many attempts. Please try again later.';
-                  }
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(errorMessage),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              } finally {
-                setState(() => isResendingEmail = false);
-                passwordController.dispose();
-              }
-            },
-            child: const Text('Send'),
+                },
+                child: const Text('Send'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -545,7 +569,9 @@ class _AuthScreenState extends State<AuthScreen> {
     if (email.isEmpty && (forceValidate || _tappedFields['email']!)) {
       return "Email is required";
     } else if (email.isNotEmpty) {
-      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com)$');
+      final emailRegex = RegExp(
+        r'^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com)$',
+      );
       if (!emailRegex.hasMatch(email)) {
         return "Use a valid email (e.g., @gmail.com, @yahoo.com, @outlook.com)";
       }
@@ -565,11 +591,14 @@ class _AuthScreenState extends State<AuthScreen> {
         return "Password is required";
       } else if (password.isNotEmpty) {
         if (!hasMinLength) return "Password must be at least 8 characters long";
-        if (!hasUppercase) return "Password must contain at least one uppercase letter";
-        if (!hasLowercase) return "Password must contain at least one lowercase letter";
+        if (!hasUppercase)
+          return "Password must contain at least one uppercase letter";
+        if (!hasLowercase)
+          return "Password must contain at least one lowercase letter";
         if (!hasNumber) return "Password must contain at least one number";
       }
-    } else { // Login just requires a password to be present
+    } else {
+      // Login just requires a password to be present
       if (password.isEmpty && (forceValidate || _tappedFields['password']!)) {
         return "Password is required";
       }
@@ -582,14 +611,17 @@ class _AuthScreenState extends State<AuthScreen> {
       return "Full name is required";
     } else if (name.isNotEmpty) {
       if (name.length < 4) return "Name must be at least 4 characters long";
-      if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name)) return "Name can only contain letters and spaces";
+      if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(name))
+        return "Name can only contain letters and spaces";
     }
     return null;
   }
 
   String? _validateSport(String sport, {bool forceValidate = false}) {
     if (sport.isEmpty && (forceValidate || _tappedFields['sport']!)) {
-      return selectedRole == 'Doctor' ? "Specialization is required" : "Sport is required";
+      return selectedRole == 'Doctor'
+          ? "Specialization is required"
+          : "Sport is required";
     }
     return null;
   }
@@ -599,7 +631,13 @@ class _AuthScreenState extends State<AuthScreen> {
       return "Date of birth is required";
     } else if (dob != null) {
       final now = DateTime.now();
-      final age = now.year - dob.year - (now.month > dob.month || (now.month == dob.month && now.day >= dob.day) ? 0 : 1);
+      final age =
+          now.year -
+          dob.year -
+          (now.month > dob.month ||
+                  (now.month == dob.month && now.day >= dob.day)
+              ? 0
+              : 1);
       if (age < 13) return "You must be at least 13 years old";
     }
     return null;
@@ -655,23 +693,36 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       _tappedFields['email'] = true;
       _tappedFields['password'] = true;
-      _fieldErrors['email'] = _validateEmail(_emailController.text.trim(), forceValidate: true);
-      _fieldErrors['password'] = _validatePassword(_passwordController.text, forceValidate: true);
+      _fieldErrors['email'] = _validateEmail(
+        _emailController.text.trim(),
+        forceValidate: true,
+      );
+      _fieldErrors['password'] = _validatePassword(
+        _passwordController.text,
+        forceValidate: true,
+      );
 
       if (!isLogin) {
         _tappedFields['name'] = true;
         _tappedFields['sport'] = true;
         _tappedFields['dob'] = true;
-        _fieldErrors['name'] = _validateName(_nameController.text.trim(), forceValidate: true);
-        _fieldErrors['sport'] = _validateSport(_sportController.text.trim(), forceValidate: true);
+        _fieldErrors['name'] = _validateName(
+          _nameController.text.trim(),
+          forceValidate: true,
+        );
+        _fieldErrors['sport'] = _validateSport(
+          _sportController.text.trim(),
+          forceValidate: true,
+        );
         _fieldErrors['dob'] = _validateDob(dob, forceValidate: true);
       }
     });
 
     // Check for errors
-    final activeErrors = isLogin
-        ? [_fieldErrors['email'], _fieldErrors['password']]
-        : _fieldErrors.values;
+    final activeErrors =
+        isLogin
+            ? [_fieldErrors['email'], _fieldErrors['password']]
+            : _fieldErrors.values;
 
     final errors = activeErrors.where((error) => error != null).toList();
     if (errors.isNotEmpty) {
@@ -694,9 +745,9 @@ class _AuthScreenState extends State<AuthScreen> {
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
       }
     }
   }
@@ -713,7 +764,11 @@ class _AuthScreenState extends State<AuthScreen> {
       );
 
       // Get user data from Firestore
-      final userDoc = await _firestore.collection('users').doc(userCredential.user!.uid).get();
+      final userDoc =
+          await _firestore
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .get();
 
       if (!userDoc.exists) {
         await _auth.signOut();
@@ -753,7 +808,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
       // Proceed to dashboard
       await _navigateBasedOnRole(refreshedUser.uid);
-
     } on FirebaseAuthException catch (e) {
       setState(() => isLoading = false);
       String errorMessage;
@@ -769,28 +823,31 @@ class _AuthScreenState extends State<AuthScreen> {
           errorMessage = "This user account has been disabled.";
           break;
         case 'invalid-credential':
-          errorMessage = "Invalid email or password. Please check your credentials.";
+          errorMessage =
+              "Invalid email or password. Please check your credentials.";
           break;
         case 'too-many-requests':
           errorMessage = "Too many failed attempts. Please try again later.";
           break;
         default:
-          errorMessage = e.message ?? "An unknown error occurred. Please try again.";
+          errorMessage =
+              e.message ?? "An unknown error occurred. Please try again.";
       }
 
       if (mounted) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Login Error'),
-            content: Text(errorMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Login Error'),
+                content: Text(errorMessage),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       }
     }
@@ -802,7 +859,9 @@ class _AuthScreenState extends State<AuthScreen> {
       final email = _emailController.text.trim();
 
       // Check if user already exists
-      List<String> signInMethods = await _auth.fetchSignInMethodsForEmail(email);
+      List<String> signInMethods = await _auth.fetchSignInMethodsForEmail(
+        email,
+      );
 
       if (signInMethods.isNotEmpty) {
         setState(() => isLoading = false);
@@ -816,17 +875,22 @@ class _AuthScreenState extends State<AuthScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Email already registered. Please try logging in or verify your email if not done already.')),
+            const SnackBar(
+              content: Text(
+                'Email already registered. Please try logging in or verify your email if not done already.',
+              ),
+            ),
           );
         }
         return;
       }
 
       // Create user account
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: _passwordController.text,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(
+            email: email,
+            password: _passwordController.text,
+          );
 
       // Store user data in Firestore immediately after account creation
       await _storeUserDataInFirestore(userCredential.user!);
@@ -843,43 +907,47 @@ class _AuthScreenState extends State<AuthScreen> {
 
       _showSignupSuccessDialog();
       _startEmailVerificationCheck(); // Start checking for verification
-
     } on FirebaseAuthException catch (e) {
       setState(() => isLoading = false);
       String errorMessage;
       switch (e.code) {
         case 'email-already-in-use':
-        // Check if this is an unverified user
+          // Check if this is an unverified user
           final userData = await _getUserData(_emailController.text.trim());
           if (userData != null && userData['emailVerified'] == false) {
             _showExistingUnverifiedUserDialog(_emailController.text.trim());
             return;
           }
-          errorMessage = "This email is already registered. Please try logging in or verify your email if not done already.";
+          errorMessage =
+              "This email is already registered. Please try logging in or verify your email if not done already.";
           break;
         case 'weak-password':
-          errorMessage = "Your password must be at least 8 characters and contain a number.";
+          errorMessage =
+              "Your password must be at least 8 characters and contain a number.";
           break;
         case 'operation-not-allowed':
-          errorMessage = "This operation is not allowed. Please contact support.";
+          errorMessage =
+              "This operation is not allowed. Please contact support.";
           break;
         default:
-          errorMessage = e.message ?? "An unknown error occurred. Please try again.";
+          errorMessage =
+              e.message ?? "An unknown error occurred. Please try again.";
       }
 
       if (mounted) {
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Signup Error'),
-            content: Text(errorMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text('Signup Error'),
+                content: Text(errorMessage),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       }
     }
@@ -890,49 +958,54 @@ class _AuthScreenState extends State<AuthScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Email Already Registered'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.mark_email_unread,
-              color: Colors.orange,
-              size: 48,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Email Already Registered'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.mark_email_unread,
+                  color: Colors.orange,
+                  size: 48,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'This email is already registered but not verified. A verification email was previously sent to $email.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Please check your inbox and spam folder, or resend the verification email.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              'This email is already registered but not verified. A verification email was previously sent to $email.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Please check your inbox and spam folder, or resend the verification email.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: isResendingEmail ? null : () async {
-              Navigator.of(context).pop();
-              await _resendVerificationForSignup(email);
-            },
-            child: isResendingEmail
-                ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-                : const Text('Resend Email'),
+            actions: [
+              TextButton(
+                onPressed:
+                    isResendingEmail
+                        ? null
+                        : () async {
+                          Navigator.of(context).pop();
+                          await _resendVerificationForSignup(email);
+                        },
+                child:
+                    isResendingEmail
+                        ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Text('Resend Email'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
     );
   }
 
@@ -945,9 +1018,9 @@ class _AuthScreenState extends State<AuthScreen> {
       _showPasswordForResendSignupDialog(email);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       setState(() => isResendingEmail = false);
@@ -960,79 +1033,90 @@ class _AuthScreenState extends State<AuthScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Resend Verification Email'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Please enter your password to resend the verification email:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Resend Verification Email'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Please enter your password to resend the verification email:',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              passwordController.dispose();
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                Navigator.of(context).pop();
-                setState(() => isResendingEmail = true);
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  passwordController.dispose();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    Navigator.of(context).pop();
+                    setState(() => isResendingEmail = true);
 
-                // Sign in to send verification email
-                UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-                  email: email,
-                  password: passwordController.text,
-                );
+                    // Sign in to send verification email
+                    UserCredential userCredential = await _auth
+                        .signInWithEmailAndPassword(
+                          email: email,
+                          password: passwordController.text,
+                        );
 
-                if (!userCredential.user!.emailVerified) {
-                  await userCredential.user!.sendEmailVerification();
+                    if (!userCredential.user!.emailVerified) {
+                      await userCredential.user!.sendEmailVerification();
 
-                  // Go to verification pending screen and start checking
-                  setState(() {
-                    isEmailVerificationPending = true;
-                    pendingVerificationEmail = email;
-                  });
+                      // Go to verification pending screen and start checking
+                      setState(() {
+                        isEmailVerificationPending = true;
+                        pendingVerificationEmail = email;
+                      });
 
-                  _startEmailVerificationCheck();
+                      _startEmailVerificationCheck();
 
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Verification email sent! Please check your inbox and spam folder.')),
-                    );
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Verification email sent! Please check your inbox and spam folder.',
+                            ),
+                          ),
+                        );
+                      }
+                    } else {
+                      // User is already verified, navigate to dashboard
+                      await _updateEmailVerificationStatus(
+                        userCredential.user!.uid,
+                        true,
+                      );
+                      await _navigateBasedOnRole(userCredential.user!.uid);
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    }
+                  } finally {
+                    setState(() => isResendingEmail = false);
+                    passwordController.dispose();
                   }
-                } else {
-                  // User is already verified, navigate to dashboard
-                  await _updateEmailVerificationStatus(userCredential.user!.uid, true);
-                  await _navigateBasedOnRole(userCredential.user!.uid);
-                }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${e.toString()}')),
-                  );
-                }
-              } finally {
-                setState(() => isResendingEmail = false);
-                passwordController.dispose();
-              }
-            },
-            child: const Text('Send'),
+                },
+                child: const Text('Send'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1105,11 +1189,7 @@ class _AuthScreenState extends State<AuthScreen> {
       ),
       child: Column(
         children: [
-          const Icon(
-            Icons.mark_email_unread,
-            color: Colors.orange,
-            size: 48,
-          ),
+          const Icon(Icons.mark_email_unread, color: Colors.orange, size: 48),
           const SizedBox(height: 12),
           const Text(
             'Email Verification Required',
@@ -1139,32 +1219,46 @@ class _AuthScreenState extends State<AuthScreen> {
                 children: [
                   Expanded(
                     child: TextButton.icon(
-                      onPressed: isResendingEmail ? null : () async {
-                        await _resendVerificationEmailForPending();
-                      },
-                      icon: isResendingEmail
-                          ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                          : const Icon(Icons.refresh),
-                      label: Text(isResendingEmail ? 'Sending...' : 'Resend Email'),
+                      onPressed:
+                          isResendingEmail
+                              ? null
+                              : () async {
+                                await _resendVerificationEmailForPending();
+                              },
+                      icon:
+                          isResendingEmail
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.refresh),
+                      label: Text(
+                        isResendingEmail ? 'Sending...' : 'Resend Email',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: isLoading ? null : () async {
-                        await _checkVerificationManually();
-                      },
-                      icon: isLoading
-                          ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                          : const Icon(Icons.check),
+                      onPressed:
+                          isLoading
+                              ? null
+                              : () async {
+                                await _checkVerificationManually();
+                              },
+                      icon:
+                          isLoading
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.check),
                       label: Text(isLoading ? 'Checking...' : 'I\'ve Verified'),
                     ),
                   ),
@@ -1172,10 +1266,11 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
               const SizedBox(height: 8),
               TextButton.icon(
-                onPressed: () => setState(() {
-                  isEmailVerificationPending = false;
-                  _emailVerificationTimer?.cancel();
-                }),
+                onPressed:
+                    () => setState(() {
+                      isEmailVerificationPending = false;
+                      _emailVerificationTimer?.cancel();
+                    }),
                 icon: const Icon(Icons.arrow_back),
                 label: const Text('Go Back'),
               ),
@@ -1203,7 +1298,9 @@ class _AuthScreenState extends State<AuthScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Verification email sent! Please check your inbox and spam folder.'),
+                content: Text(
+                  'Verification email sent! Please check your inbox and spam folder.',
+                ),
                 backgroundColor: Colors.green,
               ),
             );
@@ -1226,11 +1323,12 @@ class _AuthScreenState extends State<AuthScreen> {
       if (mounted) {
         String errorMessage = 'Error sending verification email';
         if (e.toString().contains('too-many-requests')) {
-          errorMessage = 'Too many requests. Please wait a moment before trying again.';
+          errorMessage =
+              'Too many requests. Please wait a moment before trying again.';
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMessage)));
       }
     } finally {
       setState(() => isResendingEmail = false);
@@ -1266,7 +1364,9 @@ class _AuthScreenState extends State<AuthScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Email is still not verified. Please check your inbox and click the verification link first.'),
+                content: Text(
+                  'Email is still not verified. Please check your inbox and click the verification link first.',
+                ),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -1281,9 +1381,9 @@ class _AuthScreenState extends State<AuthScreen> {
     } catch (e) {
       setState(() => isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -1294,95 +1394,105 @@ class _AuthScreenState extends State<AuthScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Verify Login'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Please enter your password to check verification status:'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Verify Login'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Please enter your password to check verification status:',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              passwordController.dispose();
-              setState(() => isLoading = false);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              try {
-                Navigator.of(context).pop();
-
-                // Sign in to check verification status
-                UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-                  email: email,
-                  password: passwordController.text,
-                );
-
-                // Reload user to get latest verification status
-                await userCredential.user!.reload();
-                final refreshedUser = _auth.currentUser;
-
-                if (refreshedUser != null && refreshedUser.emailVerified) {
-                  // Email is verified, update Firestore and navigate
-                  await _updateEmailVerificationStatus(refreshedUser.uid, true);
-
-                  setState(() {
-                    isEmailVerificationPending = false;
-                    isLoading = false;
-                  });
-
-                  await _navigateBasedOnRole(refreshedUser.uid);
-                } else {
-                  // Still not verified
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  passwordController.dispose();
                   setState(() => isLoading = false);
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    Navigator.of(context).pop();
 
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Email is still not verified. Please check your inbox and click the verification link first.'),
-                        backgroundColor: Colors.orange,
-                      ),
-                    );
-                  }
-                }
-              } catch (e) {
-                setState(() => isLoading = false);
-                if (mounted) {
-                  String errorMessage = 'Invalid password or network error';
-                  if (e.toString().contains('wrong-password')) {
-                    errorMessage = 'Incorrect password. Please try again.';
-                  } else if (e.toString().contains('too-many-requests')) {
-                    errorMessage = 'Too many attempts. Please try again later.';
-                  }
+                    // Sign in to check verification status
+                    UserCredential userCredential = await _auth
+                        .signInWithEmailAndPassword(
+                          email: email,
+                          password: passwordController.text,
+                        );
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(errorMessage),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              } finally {
-                passwordController.dispose();
-              }
-            },
-            child: const Text('Check'),
+                    // Reload user to get latest verification status
+                    await userCredential.user!.reload();
+                    final refreshedUser = _auth.currentUser;
+
+                    if (refreshedUser != null && refreshedUser.emailVerified) {
+                      // Email is verified, update Firestore and navigate
+                      await _updateEmailVerificationStatus(
+                        refreshedUser.uid,
+                        true,
+                      );
+
+                      setState(() {
+                        isEmailVerificationPending = false;
+                        isLoading = false;
+                      });
+
+                      await _navigateBasedOnRole(refreshedUser.uid);
+                    } else {
+                      // Still not verified
+                      setState(() => isLoading = false);
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Email is still not verified. Please check your inbox and click the verification link first.',
+                            ),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      }
+                    }
+                  } catch (e) {
+                    setState(() => isLoading = false);
+                    if (mounted) {
+                      String errorMessage = 'Invalid password or network error';
+                      if (e.toString().contains('wrong-password')) {
+                        errorMessage = 'Incorrect password. Please try again.';
+                      } else if (e.toString().contains('too-many-requests')) {
+                        errorMessage =
+                            'Too many attempts. Please try again later.';
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } finally {
+                    passwordController.dispose();
+                  }
+                },
+                child: const Text('Check'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -1392,335 +1502,518 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const SizedBox(height: 30),
-              Image.asset(
-                'assets/applogo.png',
-                height: 80,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xff487CFF), Color(0xffB9ECFF)],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-              const SizedBox(height: 16),
-              Text(
-                isEmailVerificationPending
-                    ? 'Verify Your Email'
-                    : isLogin ? 'Welcome Back' : 'Create an Account',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                isEmailVerificationPending
-                    ? 'Check your email to continue'
-                    : isLogin ? 'Log in to continue' : 'Sign up to get started',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 20),
-
-              if (isEmailVerificationPending)
-                _buildEmailVerificationPending()
-              else
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade300,
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  Image.asset('assets/basketballl_image.png', height: 80),
+                  const SizedBox(height: 16),
+                  Text(
+                    "WELCOME TO",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontSize: 15,
+                    ),
                   ),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => toggle(true),
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: isLogin ? Colors.blue : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  "Login",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: isLogin ? Colors.white : Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: GestureDetector(
-                              onTap: () => toggle(false),
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: !isLogin ? Colors.blue : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  "Signup",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: !isLogin ? Colors.white : Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      if (!isLogin) ...[
-                        // FULL NAME
-                        TextField(
-                          controller: _nameController,
-                          onTap: () => setState(() => _tappedFields['name'] = true),
-                          decoration: InputDecoration(
-                            labelText: "Full Name",
-                            border: const OutlineInputBorder(),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: _getBorderColor('name', hasText: _nameController.text.isNotEmpty),
-                                width: 2,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: _getBorderColor('name', hasText: _nameController.text.isNotEmpty),
-                                width: 1,
-                              ),
-                            ),
-                            errorText: _tappedFields['name']! ? _fieldErrors['name'] : null,
-                          ),
-                          onChanged: (value) => _validateField('name', value),
-                        ),
-                        const SizedBox(height: 12),
+                  Text(
+                    "ATHLETIX",
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 25,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
 
-                        // DOB
-                        GestureDetector(
-                          onTap: () async {
-                            setState(() => _tappedFields['dob'] = true);
-                            final picked = await showDatePicker(
-                              context: context,
-                              initialDate: dob ?? DateTime(2000),
-                              firstDate: DateTime(1950),
-                              lastDate: DateTime.now(),
-                            );
-                            if (picked != null) {
-                              setState(() {
-                                dob = picked;
-                                _dobController.text = dob!.toLocal().toString().split(' ')[0];
-                                _validateField('dob', dob);
-                              });
-                            }
-                          },
-                          child: AbsorbPointer(
-                            child: TextField(
-                              controller: _dobController,
+                  if (isEmailVerificationPending)
+                    _buildEmailVerificationPending()
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white54,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => toggle(true),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    margin: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors:
+                                            isLogin
+                                                ? [
+                                                  Color(0xff006EFF),
+                                                  Color(0xff00CCFF),
+                                                ]
+                                                : [
+                                                  Colors.transparent,
+                                                  Colors.transparent,
+                                                ],
+                                      ),
+
+                                      borderRadius: BorderRadius.circular(8),
+                                      border:
+                                          (!isLogin)
+                                              ? Border.all(
+                                                color: Color(0xff80A8FF),
+                                                width: 1.5,
+                                              )
+                                              : Border.all(
+                                                color: Colors.transparent,
+                                                width: 1.5,
+                                              ),
+                                    ),
+                                    child: Text(
+                                      "Login",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            isLogin
+                                                ? Colors.white
+                                                : Color(0xff005EFF),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () => toggle(false),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12),
+                                    margin: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors:
+                                            !isLogin
+                                                ? [
+                                                  Color(0xff006EFF),
+                                                  Color(0xff00CCFF),
+                                                ]
+                                                : [
+                                                  Colors.transparent,
+                                                  Colors.transparent,
+                                                ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border:
+                                          (isLogin)
+                                              ? Border.all(
+                                                color: Color(0xff80A8FF),
+                                                width: 1.5,
+                                              )
+                                              : Border.all(
+                                                color: Colors.transparent,
+                                                width: 1.5,
+                                              ),
+                                    ),
+                                    child: Text(
+                                      "Signup",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color:
+                                            !isLogin
+                                                ? Colors.white
+                                                : Colors.black87,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          if (!isLogin) ...[
+                            // FULL NAME
+                            TextField(
+                              controller: _nameController,
+                              onTap:
+                                  () => setState(
+                                    () => _tappedFields['name'] = true,
+                                  ),
                               decoration: InputDecoration(
-                                labelText: "Date of Birth",
+                                filled: true,
+                                fillColor: Colors.white,
+                                labelText: "Full Name",
                                 border: const OutlineInputBorder(),
-                                suffixIcon: const Icon(Icons.calendar_today),
                                 focusedBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: _getBorderColor('dob', hasText: dob != null),
+                                    color: _getBorderColor(
+                                      'name',
+                                      hasText: _nameController.text.isNotEmpty,
+                                    ),
                                     width: 2,
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderSide: BorderSide(
-                                    color: _getBorderColor('dob', hasText: dob != null),
+                                    color: _getBorderColor(
+                                      'name',
+                                      hasText: _nameController.text.isNotEmpty,
+                                    ),
                                     width: 1,
                                   ),
                                 ),
-                                errorText: _tappedFields['dob']! ? _fieldErrors['dob'] : null,
+                                errorText:
+                                    _tappedFields['name']!
+                                        ? _fieldErrors['name']
+                                        : null,
                               ),
+                              onChanged:
+                                  (value) => _validateField('name', value),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        // ROLE
-                        DropdownButtonFormField<String>(
-                          value: selectedRole,
-                          items: roles
-                              .map((role) => DropdownMenuItem(
-                            value: role,
-                            child: Text(role),
-                          ))
-                              .toList(),
-                          onChanged: (value) => setState(() {
-                            selectedRole = value!;
-                          }),
-                          decoration: const InputDecoration(
-                            labelText: "Role",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
+                            const SizedBox(height: 12),
 
-                        // SPORT/SPECIALIZATION
-                        (selectedRole == 'Doctor')
-                            ? TextField(
-                          controller: _sportController,
-                          onTap: () => setState(() => _tappedFields['sport'] = true),
-                          decoration: InputDecoration(
-                            labelText: "Specialization",
-                            border: const OutlineInputBorder(),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: _getBorderColor('sport', hasText: _sportController.text.isNotEmpty),
-                                width: 2,
+                            // DOB
+                            GestureDetector(
+                              onTap: () async {
+                                setState(() => _tappedFields['dob'] = true);
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: dob ?? DateTime(2000),
+                                  firstDate: DateTime(1950),
+                                  lastDate: DateTime.now(),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    dob = picked;
+                                    _dobController.text =
+                                        dob!.toLocal().toString().split(' ')[0];
+                                    _validateField('dob', dob);
+                                  });
+                                }
+                              },
+                              child: AbsorbPointer(
+                                child: TextField(
+                                  controller: _dobController,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    labelText: "Date of Birth",
+                                    border: const OutlineInputBorder(),
+                                    suffixIcon: const Icon(
+                                      Icons.calendar_today,
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _getBorderColor(
+                                          'dob',
+                                          hasText: dob != null,
+                                        ),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _getBorderColor(
+                                          'dob',
+                                          hasText: dob != null,
+                                        ),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    errorText:
+                                        _tappedFields['dob']!
+                                            ? _fieldErrors['dob']
+                                            : null,
+                                  ),
+                                ),
                               ),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: _getBorderColor('sport', hasText: _sportController.text.isNotEmpty),
-                                width: 1,
+                            const SizedBox(height: 12),
+                            // ROLE
+                            DropdownButtonFormField<String>(
+                              value: selectedRole,
+                              items:
+                                  roles
+                                      .map(
+                                        (role) => DropdownMenuItem(
+                                          value: role,
+                                          child: Text(role),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged:
+                                  (value) => setState(() {
+                                    selectedRole = value!;
+                                  }),
+                              decoration: const InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                labelText: "Role",
+                                border: OutlineInputBorder(),
                               ),
                             ),
-                            errorText: _tappedFields['sport']! ? _fieldErrors['sport'] : null,
-                          ),
-                          onChanged: (value) => _validateField('sport', value),
-                        )
-                            : DropdownButtonFormField<String>(
-                          value: _sportController.text.isNotEmpty ? _sportController.text : null,
-                          items: [
-                            'Football',
-                            'Basketball',
-                            'Cricket',
-                            'Tennis',
-                            'Athletics',
-                            'Swimming',
-                          ].map((sport) => DropdownMenuItem(
-                            value: sport,
-                            child: Text(sport),
-                          )).toList(),
-                          onChanged: (value) {
-                            _debounceInput(() {
-                              _sportController.text = value ?? '';
-                              _tappedFields['sport'] = true;
-                              _validateField('sport', value);
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Sport",
-                            border: const OutlineInputBorder(),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: _getBorderColor('sport', hasText: _sportController.text.isNotEmpty),
-                                width: 2,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: _getBorderColor('sport', hasText: _sportController.text.isNotEmpty),
-                                width: 1,
-                              ),
-                            ),
-                            errorText: _tappedFields['sport']! ? _fieldErrors['sport'] : null,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
+                            const SizedBox(height: 12),
 
-                      // EMAIL
-                      TextField(
-                        controller: _emailController,
-                        onTap: () => setState(() => _tappedFields['email'] = true),
-                        decoration: InputDecoration(
-                          labelText: "Email",
-                          border: const OutlineInputBorder(),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: _getBorderColor('email', hasText: _emailController.text.isNotEmpty),
-                              width: 2,
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: _getBorderColor('email', hasText: _emailController.text.isNotEmpty),
-                              width: 1,
-                            ),
-                          ),
-                          errorText: (!isLogin && _tappedFields['email']!) ? _fieldErrors['email'] : null,
-                        ),
-                        onChanged: (value) => _validateField('email', value),
-                      ),
-                      const SizedBox(height: 12),
+                            // SPORT/SPECIALIZATION
+                            (selectedRole == 'Doctor')
+                                ? TextField(
+                                  controller: _sportController,
+                                  onTap:
+                                      () => setState(
+                                        () => _tappedFields['sport'] = true,
+                                      ),
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    labelText: "Specialization",
+                                    border: const OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _getBorderColor(
+                                          'sport',
+                                          hasText:
+                                              _sportController.text.isNotEmpty,
+                                        ),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _getBorderColor(
+                                          'sport',
+                                          hasText:
+                                              _sportController.text.isNotEmpty,
+                                        ),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    errorText:
+                                        _tappedFields['sport']!
+                                            ? _fieldErrors['sport']
+                                            : null,
+                                  ),
+                                  onChanged:
+                                      (value) => _validateField('sport', value),
+                                )
+                                : DropdownButtonFormField<String>(
+                                  value:
+                                      _sportController.text.isNotEmpty
+                                          ? _sportController.text
+                                          : null,
+                                  items:
+                                      [
+                                            'Football',
+                                            'Basketball',
+                                            'Cricket',
+                                            'Tennis',
+                                            'Athletics',
+                                            'Swimming',
+                                          ]
+                                          .map(
+                                            (sport) => DropdownMenuItem(
+                                              value: sport,
+                                              child: Text(sport),
+                                            ),
+                                          )
+                                          .toList(),
+                                  onChanged: (value) {
+                                    _debounceInput(() {
+                                      _sportController.text = value ?? '';
+                                      _tappedFields['sport'] = true;
+                                      _validateField('sport', value);
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    labelText: "Sport",
+                                    border: const OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _getBorderColor(
+                                          'sport',
+                                          hasText:
+                                              _sportController.text.isNotEmpty,
+                                        ),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: _getBorderColor(
+                                          'sport',
+                                          hasText:
+                                              _sportController.text.isNotEmpty,
+                                        ),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    errorText:
+                                        _tappedFields['sport']!
+                                            ? _fieldErrors['sport']
+                                            : null,
+                                  ),
+                                ),
+                            const SizedBox(height: 12),
+                          ],
 
-                      // PASSWORD
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: true,
-                        onTap: () => setState(() => _tappedFields['password'] = true),
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          border: const OutlineInputBorder(),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: _getBorderColor('password', hasText: _passwordController.text.isNotEmpty),
-                              width: 2,
+                          // EMAIL
+                          TextField(
+                            controller: _emailController,
+                            onTap:
+                                () => setState(
+                                  () => _tappedFields['email'] = true,
+                                ),
+
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              labelText: "Email",
+                              border: const OutlineInputBorder(),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _getBorderColor(
+                                    'email',
+                                    hasText: _emailController.text.isNotEmpty,
+                                  ),
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _getBorderColor(
+                                    'email',
+                                    hasText: _emailController.text.isNotEmpty,
+                                  ),
+                                  width: 1,
+                                ),
+                              ),
+                              errorText:
+                                  (!isLogin && _tappedFields['email']!)
+                                      ? _fieldErrors['email']
+                                      : null,
                             ),
+                            onChanged:
+                                (value) => _validateField('email', value),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: _getBorderColor('password', hasText: _passwordController.text.isNotEmpty),
-                              width: 1,
+                          const SizedBox(height: 12),
+
+                          // PASSWORD
+                          TextField(
+                            controller: _passwordController,
+                            obscureText: true,
+                            onTap:
+                                () => setState(
+                                  () => _tappedFields['password'] = true,
+                                ),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              labelText: "Password",
+
+                              border: const OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.white),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _getBorderColor(
+                                    'password',
+                                    hasText:
+                                        _passwordController.text.isNotEmpty,
+                                  ),
+                                  width: 2,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: _getBorderColor(
+                                    'password',
+                                    hasText:
+                                        _passwordController.text.isNotEmpty,
+                                  ),
+                                  width: 1,
+                                ),
+                              ),
+                              errorText:
+                                  (!isLogin && _tappedFields['password']!)
+                                      ? _fieldErrors['password']
+                                      : null,
                             ),
+                            onChanged:
+                                (value) => _validateField('password', value),
                           ),
-                          errorText: (!isLogin && _tappedFields['password']!)  ? _fieldErrors['password'] : null,
-                        ),
-                        onChanged: (value) => _validateField('password', value),
-                      ),
-                      if (!isLogin && _tappedFields['password']!) ...[
-                        const SizedBox(height: 12),
-                        _buildPasswordChecklist(),
-                      ],
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
+                          if (!isLogin && _tappedFields['password']!) ...[
+                            const SizedBox(height: 12),
+                            _buildPasswordChecklist(),
+                          ],
+                          const SizedBox(height: 20),
+                          Container(
+                            decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
+                              gradient: LinearGradient(
+                                colors: [Color(0xff006EFF), Color(0xff00ccff)],
+                              ),
+                            ),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                onPressed: isLoading ? null : handleAuth,
+                                child:
+                                    isLoading
+                                        ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
+                                        : Text(
+                                          isLogin ? "Login" : "Signup",
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                              ),
                             ),
                           ),
-                          onPressed: isLoading ? null : handleAuth,
-                          child: isLoading
-                              ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                              : Text(
-                            isLogin ? "Login" : "Signup",
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-            ],
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

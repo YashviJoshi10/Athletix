@@ -1,8 +1,8 @@
-// At the top of your file
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ViewTournamentsScreen extends StatefulWidget {
   const ViewTournamentsScreen({super.key});
@@ -12,285 +12,253 @@ class ViewTournamentsScreen extends StatefulWidget {
 }
 
 class _ViewTournamentsScreenState extends State<ViewTournamentsScreen> {
-  final List<String> levels = ['District', 'State', 'National', 'International'];
-  final List<String> sports = ['Football', 'Cricket', 'Basketball', 'Tennis']; // Example sports
+  GoogleMapController? _mapController;
+  Set<Marker> _markers = {};
+  Map<MarkerId, Map<String, dynamic>> markerDataMap = {};
+  Map<String, dynamic>? _selectedTournament;
 
-  List<String> selectedLevels = [];
-  DateTime? selectedDate;
-  String? selectedLocation;
-  String? selectedSport;
-  bool showFilters = false;
+  /// Firestore collections
+  final CollectionReference usersRef = FirebaseFirestore.instance.collection('users');
+  final CollectionReference orgsRef = FirebaseFirestore.instance.collection('organizations');
+  final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
+
+  /// Logged-in org's sport
+  String? organizationSport;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchOrganizationSport();
+  }
+
+  /// Fetch the organization sport using logged-in user's organizationId
+Future<void> fetchOrganizationSport() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+  final userData = userDoc.data() as Map<String, dynamic>?;
+
+  if (userData == null) {
+    debugPrint("User data is null.");
+    return;
+  }
+
+  final sport = userData['sport'];
+  debugPrint("✅ Loaded sport from user document: $sport");
+
+  if (sport != null) {
+    setState(() {
+      organizationSport = sport;
+    });
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    if (organizationSport == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('View Tournaments'),
-        backgroundColor: Colors.white,
-        elevation: 0,
+        title: const Text('Tournaments Map'),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Column(
-              children: [
-                Row(
+          StreamBuilder<QuerySnapshot>(
+            stream: tournamentsRef
+                .where('sport', isEqualTo: organizationSport)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text("No tournaments found."));
+              }
+
+              final docs = snapshot.data!.docs;
+              Set<Marker> updatedMarkers = {};
+              Map<MarkerId, Map<String, dynamic>> updatedMarkerDataMap = {};
+
+              for (var doc in docs) {
+                final data = doc.data() as Map<String, dynamic>;
+                final location = data['location'];
+                final markerId = MarkerId(doc.id);
+
+                updatedMarkers.add(
+                  Marker(
+                    markerId: markerId,
+                    position: LatLng(location['lat'], location['lng']),
+                    onTap: () {
+                      _mapController?.animateCamera(
+                        CameraUpdate.newLatLng(
+                          LatLng(location['lat'], location['lng']),
+                        ),
+                      );
+                      setState(() {
+                        _selectedTournament = data;
+                      });
+                    },
+                  ),
+                );
+
+                updatedMarkerDataMap[markerId] = data;
+              }
+
+              _markers = updatedMarkers;
+              markerDataMap = updatedMarkerDataMap;
+
+              return GoogleMap(
+                initialCameraPosition: const CameraPosition(
+                  target: LatLng(20.5937, 78.9629), // India
+                  zoom: 4,
+                ),
+                markers: _markers,
+                onMapCreated: (controller) => _mapController = controller,
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: false,
+              );
+            },
+          ),
+          if (_selectedTournament != null)
+            Center(
+              child: _TournamentDetailCard(
+                data: _selectedTournament!,
+                onClose: () => setState(() => _selectedTournament = null),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// Tournament detail card widget
+class _TournamentDetailCard extends StatelessWidget {
+  final Map<String, dynamic> data;
+  final VoidCallback onClose;
+
+  const _TournamentDetailCard({
+    required this.data,
+    required this.onClose,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final location = data['location'];
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.85,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.12),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8, right: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Wrap(
-                        alignment: WrapAlignment.start,
-                        spacing: 8,
-                        runSpacing: 4,
-                        children: [
-                          ...selectedLevels.map((level) => Chip(
-                                label: Text(level),
-                                onDeleted: () => setState(() => selectedLevels.remove(level)),
-                              )),
-                          if (selectedSport != null)
-                            Chip(
-                              label: Text(selectedSport!),
-                              onDeleted: () => setState(() => selectedSport = null),
+                    Row(
+                      children: [
+                        const Icon(Icons.emoji_events, color: Colors.deepPurple, size: 28),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            data['name'] ?? '',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
-                          if (selectedLocation != null)
-                            Chip(
-                              label: Text(selectedLocation!),
-                              onDeleted: () => setState(() => selectedLocation = null),
-                            ),
-                          if (selectedDate != null)
-                            Chip(
-                              label: Text(DateFormat('yyyy-MM-dd').format(selectedDate!)),
-                              onDeleted: () => setState(() => selectedDate = null),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                         ),
-                        onPressed: () => setState(() => showFilters = !showFilters),
-                        icon: Icon(showFilters ? Icons.close : Icons.filter_list),
-                        label: Text(showFilters ? "Hide Filters" : "Show Filters"),
-                      ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        const Icon(Icons.sports, color: Colors.blueAccent, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          data['sport'] ?? '',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.flag, color: Colors.orange, size: 20),
+                        const SizedBox(width: 4),
+                        Text(
+                          data['level'] ?? '',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today, color: Colors.teal, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          DateFormat('yyyy-MM-dd')
+                              .format((data['date'] as Timestamp).toDate()),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.access_time, color: Colors.purple, size: 18),
+                        const SizedBox(width: 4),
+                        Text(
+                          data['time'],
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.location_on, color: Colors.redAccent, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            location['address'] ?? '',
+                            style: const TextStyle(fontSize: 15),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                AnimatedCrossFade(
-                  duration: const Duration(milliseconds: 300),
-                  crossFadeState: showFilters ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-                  firstChild: Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Filter Tournaments",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
-                          const SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: "Sport",
-                              filled: true,
-                              fillColor: Color(0xFFF7F8FA),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)), borderSide: BorderSide.none),
-                            ),
-                            value: selectedSport,
-                            hint: const Text("Select Sport"),
-                            items: sports.map((sport) {
-                              return DropdownMenuItem(value: sport, child: Text(sport));
-                            }).toList(),
-                            onChanged: (val) => setState(() => selectedSport = val),
-                          ),
-                          const SizedBox(height: 16),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: "Location",
-                              filled: true,
-                              fillColor: Color(0xFFF7F8FA),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)), borderSide: BorderSide.none),
-                            ),
-                            onChanged: (val) => setState(() => selectedLocation = val),
-                          ),
-                          const SizedBox(height: 16),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: levels.map((level) {
-                              final isSelected = selectedLevels.contains(level);
-                              return FilterChip(
-                                label: Text(level),
-                                labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.black),
-                                selected: isSelected,
-                                selectedColor: Colors.blue,
-                                backgroundColor: const Color(0xFFEFEFEF),
-                                onSelected: (selected) {
-                                  setState(() {
-                                    if (selected) {
-                                      selectedLevels.add(level);
-                                    } else {
-                                      selectedLevels.remove(level);
-                                    }
-                                  });
-                                },
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final picked = await showDatePicker(
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime(2022),
-                                      lastDate: DateTime(2030),
-                                    );
-                                    if (picked != null) {
-                                      setState(() => selectedDate = picked);
-                                    }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black87,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  ),
-                                  child: Text(selectedDate == null ? 'Pick Date' : DateFormat('yyyy-MM-dd').format(selectedDate!)),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    selectedLevels.clear();
-                                    selectedLocation = null;
-                                    selectedDate = null;
-                                    selectedSport = null;
-                                  });
-                                },
-                                icon: const Icon(Icons.refresh, color: Colors.red),
-                                tooltip: "Clear Filters",
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  secondChild: const SizedBox.shrink(),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.grey, size: 24),
+                  onPressed: onClose,
+                  tooltip: "Close",
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('tournaments').snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-
-                final docs = snapshot.data!.docs.where((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-
-                  final matchLevel = selectedLevels.isEmpty || selectedLevels.contains(data['level']);
-                  final matchSport = selectedSport == null || data['sport'] == selectedSport;
-                  final matchLocation = selectedLocation == null || data['location']['address'].toString().toLowerCase().contains(selectedLocation!.toLowerCase());
-                  final matchDate = selectedDate == null || (data['date'] as Timestamp).toDate().toString().startsWith(DateFormat('yyyy-MM-dd').format(selectedDate!));
-
-                  return matchLevel && matchSport && matchLocation && matchDate;
-                }).toList();
-
-                if (docs.isEmpty) return const Center(child: Text('No tournaments found.'));
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: docs.length,
-                  itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
-                    final location = data['location'];
-
-                    return Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      elevation: 6,
-                      shadowColor: Colors.black12,
-                      margin: const EdgeInsets.only(bottom: 20),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(data['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black87)),
-                            const SizedBox(height: 6),
-                            Row(children: [
-                              Icon(Icons.emoji_events, size: 18, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
-                              Text("${data['level']}", style: const TextStyle(color: Colors.black54))
-                            ]),
-                            Row(children: [
-                              Icon(Icons.sports, size: 18, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
-                              Text("${data['sport'] ?? ''}", style: const TextStyle(color: Colors.black54))
-                            ]),
-                            Row(children: [
-                              Icon(Icons.date_range, size: 18, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
-                              Text(DateFormat('yyyy-MM-dd').format((data['date'] as Timestamp).toDate()), style: const TextStyle(color: Colors.black54))
-                            ]),
-                            Row(children: [
-                              Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
-                              Text("${data['time'] ?? ''}", style: const TextStyle(color: Colors.black54))
-                            ]),
-                            const SizedBox(height: 6),
-                            Row(children: [
-                              Icon(Icons.location_on, size: 18, color: Colors.grey[600]),
-                              const SizedBox(width: 4),
-                              Expanded(child: Text("${location['address'] ?? ''}", style: const TextStyle(color: Colors.black54))),
-                            ]),
-                            const SizedBox(height: 10),
-                            SizedBox(
-                              height: 160,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: GoogleMap(
-                                  initialCameraPosition: CameraPosition(
-                                    target: LatLng(location['lat'], location['lng']),
-                                    zoom: 14,
-                                  ),
-                                  markers: {
-                                    Marker(
-                                      markerId: MarkerId(data['name']),
-                                      position: LatLng(location['lat'], location['lng']),
-                                    ),
-                                  },
-                                  zoomControlsEnabled: false,
-                                  myLocationButtonEnabled: false,
-                                  liteModeEnabled: true,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          )
-        ],
+        ),
       ),
     );
   }

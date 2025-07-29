@@ -8,13 +8,16 @@ import 'doctor/doctor_dashboard.dart';
 import 'organization/organization_dashboard.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+/// Authentication screen for login and signup, including role selection and email verification.
 class AuthScreen extends StatefulWidget {
+  /// Creates an [AuthScreen].
   const AuthScreen({super.key});
 
   @override
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
+/// State for [AuthScreen] that manages authentication logic, form validation, and navigation.
 class _AuthScreenState extends State<AuthScreen> {
   bool isLogin = true;
   bool isLoading = false;
@@ -64,12 +67,14 @@ class _AuthScreenState extends State<AuthScreen> {
   // Debounce timer
   Timer? _debounce;
 
+  /// Checks the initial authentication state and navigates accordingly.
   @override
   void initState() {
     super.initState();
     _checkInitialAuthState();
   }
 
+  /// Disposes controllers and timers to free resources.
   @override
   void dispose() {
     _debounce?.cancel();
@@ -82,7 +87,7 @@ class _AuthScreenState extends State<AuthScreen> {
     super.dispose();
   }
 
-  // FIXED: Check initial auth state when app starts
+  /// Checks the initial authentication state and user data in Firestore.
   Future<void> _checkInitialAuthState() async {
     final user = _auth.currentUser;
     if (user != null) {
@@ -127,6 +132,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  /// Debounces input changes to reduce unnecessary state updates.
   void _debounceInput(VoidCallback callback) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
@@ -136,6 +142,7 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
+  /// Toggles between login and signup modes, resetting relevant state.
   void toggle(bool login) {
     setState(() {
       isLogin = login;
@@ -158,7 +165,7 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
-  // FIXED: Store user data in Firestore during signup (don't sign out)
+  /// Stores user data in Firestore during signup.
   Future<void> _storeUserDataInFirestore(User user) async {
     await _firestore.collection('users').doc(user.uid).set({
       'name': _nameController.text.trim(),
@@ -172,14 +179,14 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
-  // Update email verification status in Firestore
+  /// Updates the email verification status in Firestore.
   Future<void> _updateEmailVerificationStatus(String uid, bool isVerified) async {
     await _firestore.collection('users').doc(uid).update({
       'emailVerified': isVerified,
     });
   }
 
-  // Check if user exists and get verification status from Firestore
+  /// Check if user exists and get verification status from Firestore.
   Future<Map<String, dynamic>?> _getUserData(String email) async {
     try {
       final querySnapshot = await _firestore
@@ -198,7 +205,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // FIXED: Start checking for email verification with user signed in
+  /// FIXED: Start checking for email verification with user signed in.
   void _startEmailVerificationCheck() {
     _emailVerificationTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
       try {
@@ -231,7 +238,7 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
-  // Proceed after email verification
+  /// Proceed after email verification.
   Future<void> _proceedAfterVerification(User user) async {
     try {
       setState(() => isLoading = true);
@@ -248,7 +255,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Navigate based on user role
+  /// Navigate based on user role.
   Future<void> _navigateBasedOnRole(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
@@ -314,7 +321,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // FIXED: Resend verification email (keep user signed in)
+  /// FIXED: Resend verification email (keep user signed in).
   Future<void> _resendVerificationEmail() async {
     if (isResendingEmail) return;
 
@@ -376,7 +383,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show verification required dialog for login attempts
+  /// Show verification required dialog for login attempts.
   void _showVerificationRequiredDialog(String email) {
     showDialog(
       context: context,
@@ -421,7 +428,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // FIXED: Resend verification email for login attempts
+  /// FIXED: Resend verification email for login attempts.
   Future<void> _resendVerificationEmailForLogin(String email) async {
     setState(() => isResendingEmail = true);
 
@@ -451,7 +458,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show password dialog for resending verification email
+  /// Show password dialog for resending verification email.
   void _showPasswordForResendDialog(String email) {
     final passwordController = TextEditingController();
 
@@ -540,7 +547,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // Validation functions
+  /// Validation functions.
   String? _validateEmail(String email, {bool forceValidate = false}) {
     if (email.isEmpty && (forceValidate || _tappedFields['email']!)) {
       return "Email is required";
@@ -647,7 +654,7 @@ class _AuthScreenState extends State<AuthScreen> {
     return Colors.grey;
   }
 
-  // Main authentication handler
+  /// Main authentication handler.
   Future<void> handleAuth() async {
     if (isLoading) return;
 
@@ -701,7 +708,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // FIXED: Handle login process with improved verification checking
+  /// Handles the login process with improved verification checking.
   Future<void> _handleLogin() async {
     try {
       final email = _emailController.text.trim();
@@ -796,7 +803,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // FIXED: Handle signup process - keep user signed in after creation
+  /// Handles the signup process - keep user signed in after creation.
   Future<void> _handleSignup() async {
     try {
       final email = _emailController.text.trim();
@@ -885,7 +892,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show dialog for existing unverified users during signup
+  /// Show dialog for existing unverified users during signup.
   void _showExistingUnverifiedUserDialog(String email) {
     showDialog(
       context: context,
@@ -936,7 +943,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // FIXED: Resend verification email for signup attempts with existing unverified users
+  /// FIXED: Resend verification email for signup attempts with existing unverified users.
   Future<void> _resendVerificationForSignup(String email) async {
     setState(() => isResendingEmail = true);
 
@@ -954,7 +961,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show password dialog for resending verification email during signup
+  /// Show password dialog for resending verification email during signup.
   void _showPasswordForResendSignupDialog(String email) {
     final passwordController = TextEditingController();
 
@@ -1036,6 +1043,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Saves the Firebase Cloud Messaging (FCM) token to the user's document in Firestore.
   Future<void> saveFcmToken() async {
     await FirebaseMessaging.instance.requestPermission();
 
@@ -1060,7 +1068,7 @@ class _AuthScreenState extends State<AuthScreen> {
     debugPrint('FCM Token saved to Firestore');
   }
 
-  // Password checklist widget
+  /// Password checklist widget.
   Widget _buildPasswordChecklist() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1073,6 +1081,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  /// Helper method to build a single checklist item.
   Widget _buildChecklistItem(String text, bool isValid) {
     return Row(
       children: [
@@ -1093,7 +1102,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // FIXED: Email verification pending widget - fixed overflow issue
+  /// FIXED: Email verification pending widget - fixed overflow issue.
   Widget _buildEmailVerificationPending() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1186,7 +1195,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // FIXED: Resend verification email when user is on pending screen
+  /// FIXED: Resend verification email when user is on pending screen.
   Future<void> _resendVerificationEmailForPending() async {
     if (isResendingEmail) return;
 
@@ -1237,7 +1246,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // FIXED: Manual verification check when user clicks "I've Verified"
+  /// FIXED: Manual verification check when user clicks "I've Verified".
   Future<void> _checkVerificationManually() async {
     if (isLoading) return;
 
@@ -1288,7 +1297,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show password dialog for manual verification check
+  /// Show password dialog for manual verification check.
   void _showPasswordForVerificationCheckDialog(String email) {
     final passwordController = TextEditingController();
 

@@ -64,6 +64,27 @@ class _AuthScreenState extends State<AuthScreen> {
   // Debounce timer
   Timer? _debounce;
 
+  // Responsive helper methods
+  bool get isSmallScreen => MediaQuery.of(context).size.width < 600;
+  bool get isMediumScreen =>
+      MediaQuery.of(context).size.width >= 600 &&
+      MediaQuery.of(context).size.width < 1024;
+  bool get isLargeScreen => MediaQuery.of(context).size.width >= 1024;
+
+  double get responsiveWidth {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (isLargeScreen) return screenWidth * 0.4;
+    if (isMediumScreen) return screenWidth * 0.6;
+    return screenWidth * 0.9;
+  }
+
+  double get responsivePadding {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (isLargeScreen) return screenWidth * 0.05;
+    if (isMediumScreen) return screenWidth * 0.06;
+    return screenWidth * 0.08;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -1146,136 +1167,272 @@ class _AuthScreenState extends State<AuthScreen> {
 
   // Password checklist widget
   Widget _buildPasswordChecklist() {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildChecklistItem("At least 8 characters", hasMinLength),
-        _buildChecklistItem("Contains uppercase letter", hasUppercase),
-        _buildChecklistItem("Contains lowercase letter", hasLowercase),
-        _buildChecklistItem("Contains a number", hasNumber),
+        _buildChecklistItem("At least 8 characters", hasMinLength, screenWidth),
+        _buildChecklistItem(
+          "Contains uppercase letter",
+          hasUppercase,
+          screenWidth,
+        ),
+        _buildChecklistItem(
+          "Contains lowercase letter",
+          hasLowercase,
+          screenWidth,
+        ),
+        _buildChecklistItem("Contains a number", hasNumber, screenWidth),
       ],
     );
   }
 
-  Widget _buildChecklistItem(String text, bool isValid) {
-    return Row(
-      children: [
-        Icon(
-          isValid ? Icons.check_circle : Icons.cancel,
-          color: isValid ? Colors.green : Colors.red,
-          size: 20,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
+  Widget _buildChecklistItem(String text, bool isValid, double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.005),
+      child: Row(
+        children: [
+          Icon(
+            isValid ? Icons.check_circle : Icons.cancel,
             color: isValid ? Colors.green : Colors.red,
-            fontSize: 14,
+            size:
+                isSmallScreen
+                    ? 18
+                    : isMediumScreen
+                    ? 20
+                    : 22,
           ),
-        ),
-      ],
+          SizedBox(width: screenWidth * 0.02),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: isValid ? Colors.green : Colors.red,
+                fontSize:
+                    isSmallScreen
+                        ? 12
+                        : isMediumScreen
+                        ? 14
+                        : 16,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // FIXED: Email verification pending widget - fixed overflow issue
+  // FIXED: Email verification pending widget - fully responsive
   Widget _buildEmailVerificationPending() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.symmetric(vertical: 16),
+      width: double.infinity,
+      constraints: BoxConstraints(
+        maxWidth: isLargeScreen ? 600 : double.infinity,
+      ),
+      padding: EdgeInsets.all(
+        isSmallScreen
+            ? 16
+            : isMediumScreen
+            ? 20
+            : 24,
+      ),
+      margin: EdgeInsets.symmetric(
+        vertical: screenHeight * (isSmallScreen ? 0.02 : 0.03),
+        horizontal: isLargeScreen ? screenWidth * 0.1 : 0,
+      ),
       decoration: BoxDecoration(
         color: Colors.orange.shade50,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
         border: Border.all(color: Colors.orange.shade200),
       ),
       child: Column(
         children: [
-          const Icon(Icons.mark_email_unread, color: Colors.orange, size: 48),
-          const SizedBox(height: 12),
-          const Text(
+          Icon(
+            Icons.mark_email_unread,
+            color: Colors.orange,
+            size:
+                isSmallScreen
+                    ? 40
+                    : isMediumScreen
+                    ? 48
+                    : 56,
+          ),
+          SizedBox(height: screenHeight * 0.015),
+          Text(
             'Email Verification Required',
             style: TextStyle(
-              fontSize: 18,
+              fontSize:
+                  isSmallScreen
+                      ? 16
+                      : isMediumScreen
+                      ? 18
+                      : 20,
               fontWeight: FontWeight.bold,
               color: Colors.orange,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: screenHeight * 0.01),
           Text(
             'We\'ve sent a verification email to\n${pendingVerificationEmail ?? _emailController.text.trim()}',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(
+              fontSize:
+                  isSmallScreen
+                      ? 12
+                      : isMediumScreen
+                      ? 14
+                      : 16,
+            ),
           ),
-          const SizedBox(height: 12),
-          const Text(
+          SizedBox(height: screenHeight * 0.015),
+          Text(
             'Please check your inbox and spam folder, then click the verification link. Once verified, click "I\'ve Verified" to continue.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(
+              fontSize:
+                  isSmallScreen
+                      ? 10
+                      : isMediumScreen
+                      ? 12
+                      : 14,
+              color: Colors.grey,
+            ),
           ),
-          const SizedBox(height: 16),
-          // FIXED: Use Column instead of Row to prevent overflow
-          Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed:
-                          isResendingEmail
-                              ? null
-                              : () async {
-                                await _resendVerificationEmailForPending();
-                              },
-                      icon:
-                          isResendingEmail
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.refresh),
-                      label: Text(
-                        isResendingEmail ? 'Sending...' : 'Resend Email',
-                      ),
+          SizedBox(height: screenHeight * 0.02),
+          // Responsive button layout
+          if (isSmallScreen) ...[
+            // Stack buttons vertically on small screens
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed:
+                        isResendingEmail
+                            ? null
+                            : () async {
+                              await _resendVerificationEmailForPending();
+                            },
+                    icon:
+                        isResendingEmail
+                            ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : Icon(Icons.refresh),
+                    label: Text(
+                      isResendingEmail ? 'Sending...' : 'Resend Email',
+                      style: TextStyle(fontSize: 12),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed:
-                          isLoading
-                              ? null
-                              : () async {
-                                await _checkVerificationManually();
-                              },
-                      icon:
-                          isLoading
-                              ? const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                              : const Icon(Icons.check),
-                      label: Text(isLoading ? 'Checking...' : 'I\'ve Verified'),
+                ),
+                SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed:
+                        isLoading
+                            ? null
+                            : () async {
+                              await _checkVerificationManually();
+                            },
+                    icon:
+                        isLoading
+                            ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : Icon(Icons.check),
+                    label: Text(
+                      isLoading ? 'Checking...' : 'I\'ve Verified',
+                      style: TextStyle(fontSize: 12),
                     ),
                   ),
-                ],
+                ),
+                SizedBox(height: 8),
+                TextButton.icon(
+                  onPressed:
+                      () => setState(() {
+                        isEmailVerificationPending = false;
+                        _emailVerificationTimer?.cancel();
+                      }),
+                  icon: Icon(Icons.arrow_back),
+                  label: Text('Go Back', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
+          ] else ...[
+            // Side by side layout for larger screens
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton.icon(
+                    onPressed:
+                        isResendingEmail
+                            ? null
+                            : () async {
+                              await _resendVerificationEmailForPending();
+                            },
+                    icon:
+                        isResendingEmail
+                            ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : Icon(Icons.refresh),
+                    label: Text(
+                      isResendingEmail ? 'Sending...' : 'Resend Email',
+                      style: TextStyle(fontSize: isMediumScreen ? 12 : 14),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed:
+                        isLoading
+                            ? null
+                            : () async {
+                              await _checkVerificationManually();
+                            },
+                    icon:
+                        isLoading
+                            ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                            : Icon(Icons.check),
+                    label: Text(
+                      isLoading ? 'Checking...' : 'I\'ve Verified',
+                      style: TextStyle(fontSize: isMediumScreen ? 12 : 14),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            TextButton.icon(
+              onPressed:
+                  () => setState(() {
+                    isEmailVerificationPending = false;
+                    _emailVerificationTimer?.cancel();
+                  }),
+              icon: Icon(Icons.arrow_back),
+              label: Text(
+                'Go Back',
+                style: TextStyle(fontSize: isMediumScreen ? 12 : 14),
               ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed:
-                    () => setState(() {
-                      isEmailVerificationPending = false;
-                      _emailVerificationTimer?.cancel();
-                    }),
-                icon: const Icon(Icons.arrow_back),
-                label: const Text('Go Back'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
@@ -1498,196 +1655,140 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xff487CFF), Color(0xffB9ECFF)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              width: double.infinity,
+              constraints: BoxConstraints(
+                maxWidth: isLargeScreen ? 800 : double.infinity,
+                minHeight: screenHeight,
               ),
-            ),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.symmetric(
+                horizontal: responsivePadding,
+                vertical: screenHeight * (isSmallScreen ? 0.03 : 0.05),
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 10),
-                  Image.asset('assets/basketballl_image.png', height: 80),
-                  const SizedBox(height: 16),
-                  Text(
-                    "WELCOME TO",
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
+                  // Basketball Logo - Responsive
+                  Container(
+                    width:
+                        isSmallScreen
+                            ? 60
+                            : isMediumScreen
+                            ? 70
+                            : 80,
+                    height:
+                        isSmallScreen
+                            ? 60
+                            : isMediumScreen
+                            ? 70
+                            : 80,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFF6B6B),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.sports_basketball,
                       color: Colors.white,
-                      fontSize: 15,
+                      size:
+                          isSmallScreen
+                              ? 30
+                              : isMediumScreen
+                              ? 35
+                              : 40,
                     ),
                   ),
-                  Text(
-                    "ATHLETIX",
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontSize: 25,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
 
-                  if (isEmailVerificationPending)
-                    _buildEmailVerificationPending()
-                  else
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white54,
-                        borderRadius: BorderRadius.circular(16),
+                  SizedBox(
+                    height: screenHeight * (isSmallScreen ? 0.03 : 0.04),
+                  ),
+
+                  if (isEmailVerificationPending) ...[
+                    _buildEmailVerificationPending(),
+                  ] else ...[
+                    // Welcome Text - Responsive
+                    Text(
+                      isLogin ? 'Welcome Back,' : 'Create Account,',
+                      style: TextStyle(
+                        fontSize:
+                            isSmallScreen
+                                ? screenWidth * 0.07
+                                : isMediumScreen
+                                ? screenWidth * 0.06
+                                : screenWidth * 0.05,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
-                      padding: const EdgeInsets.all(16),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(height: screenHeight * 0.01),
+
+                    Text(
+                      isLogin
+                          ? 'Sign in to continue'
+                          : 'Sign up to get started',
+                      style: TextStyle(
+                        fontSize:
+                            isSmallScreen
+                                ? screenWidth * 0.035
+                                : isMediumScreen
+                                ? screenWidth * 0.03
+                                : screenWidth * 0.025,
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(
+                      height: screenHeight * (isSmallScreen ? 0.04 : 0.05),
+                    ),
+
+                    // Main Form Container - Responsive
+                    Container(
+                      width: double.infinity,
+                      constraints: BoxConstraints(maxWidth: responsiveWidth),
+                      padding: EdgeInsets.all(
+                        isSmallScreen
+                            ? screenWidth * 0.04
+                            : isMediumScreen
+                            ? screenWidth * 0.045
+                            : screenWidth * 0.05,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          isSmallScreen ? 16 : 20,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: isSmallScreen ? 8 : 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => toggle(true),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    margin: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors:
-                                            isLogin
-                                                ? [
-                                                  Color(0xff006EFF),
-                                                  Color(0xff00CCFF),
-                                                ]
-                                                : [
-                                                  Colors.transparent,
-                                                  Colors.transparent,
-                                                ],
-                                      ),
-
-                                      borderRadius: BorderRadius.circular(8),
-                                      border:
-                                          (!isLogin)
-                                              ? Border.all(
-                                                color: Color(0xff80A8FF),
-                                                width: 1.5,
-                                              )
-                                              : Border.all(
-                                                color: Colors.transparent,
-                                                width: 1.5,
-                                              ),
-                                    ),
-                                    child: Text(
-                                      "Login",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            isLogin
-                                                ? Colors.white
-                                                : Color(0xff005EFF),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => toggle(false),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    margin: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors:
-                                            !isLogin
-                                                ? [
-                                                  Color(0xff006EFF),
-                                                  Color(0xff00CCFF),
-                                                ]
-                                                : [
-                                                  Colors.transparent,
-                                                  Colors.transparent,
-                                                ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border:
-                                          (isLogin)
-                                              ? Border.all(
-                                                color: Color(0xff80A8FF),
-                                                width: 1.5,
-                                              )
-                                              : Border.all(
-                                                color: Colors.transparent,
-                                                width: 1.5,
-                                              ),
-                                    ),
-                                    child: Text(
-                                      "Signup",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color:
-                                            !isLogin
-                                                ? Colors.white
-                                                : Colors.black87,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
                           if (!isLogin) ...[
-                            // FULL NAME
-                            TextField(
+                            // Full Name Field (Signup only)
+                            _buildInputField(
                               controller: _nameController,
-                              onTap:
-                                  () => setState(
-                                    () => _tappedFields['name'] = true,
-                                  ),
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                labelText: "Full Name",
-                                border: const OutlineInputBorder(),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: _getBorderColor(
-                                      'name',
-                                      hasText: _nameController.text.isNotEmpty,
-                                    ),
-                                    width: 2,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: _getBorderColor(
-                                      'name',
-                                      hasText: _nameController.text.isNotEmpty,
-                                    ),
-                                    width: 1,
-                                  ),
-                                ),
-                                errorText:
-                                    _tappedFields['name']!
-                                        ? _fieldErrors['name']
-                                        : null,
-                              ),
-                              onChanged:
-                                  (value) => _validateField('name', value),
+                              label: "Full Name",
+                              fieldKey: 'name',
+                              validator: (value) => _validateName(value ?? ''),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: screenHeight * 0.02),
 
-                            // DOB
+                            // Date of Birth Field (Signup only)
                             GestureDetector(
                               onTap: () async {
                                 setState(() => _tappedFields['dob'] = true);
@@ -1707,114 +1808,116 @@ class _AuthScreenState extends State<AuthScreen> {
                                 }
                               },
                               child: AbsorbPointer(
-                                child: TextField(
+                                child: _buildInputField(
                                   controller: _dobController,
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    labelText: "Date of Birth",
-                                    border: const OutlineInputBorder(),
-                                    suffixIcon: const Icon(
-                                      Icons.calendar_today,
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _getBorderColor(
-                                          'dob',
-                                          hasText: dob != null,
-                                        ),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _getBorderColor(
-                                          'dob',
-                                          hasText: dob != null,
-                                        ),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    errorText:
-                                        _tappedFields['dob']!
-                                            ? _fieldErrors['dob']
-                                            : null,
-                                  ),
+                                  label: "Date of Birth",
+                                  fieldKey: 'dob',
+                                  validator: (value) => _validateDob(dob),
+                                  suffixIcon: Icons.calendar_today,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            // ROLE
-                            DropdownButtonFormField<String>(
-                              value: selectedRole,
-                              items:
-                                  roles
-                                      .map(
-                                        (role) => DropdownMenuItem(
-                                          value: role,
-                                          child: Text(role),
-                                        ),
-                                      )
-                                      .toList(),
-                              onChanged:
-                                  (value) => setState(() {
-                                    selectedRole = value!;
-                                  }),
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                labelText: "Role",
-                                border: OutlineInputBorder(),
+                            SizedBox(height: screenHeight * 0.02),
+
+                            // Role Dropdown (Signup only) - Responsive
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  isSmallScreen ? 10 : 12,
+                                ),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: DropdownButtonFormField<String>(
+                                value: selectedRole,
+                                decoration: InputDecoration(
+                                  labelText: "Role",
+                                  labelStyle: TextStyle(
+                                    fontSize:
+                                        isSmallScreen
+                                            ? screenWidth * 0.035
+                                            : isMediumScreen
+                                            ? screenWidth * 0.03
+                                            : screenWidth * 0.025,
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.04,
+                                    vertical: screenHeight * 0.01,
+                                  ),
+                                ),
+                                style: TextStyle(
+                                  fontSize:
+                                      isSmallScreen
+                                          ? screenWidth * 0.035
+                                          : isMediumScreen
+                                          ? screenWidth * 0.03
+                                          : screenWidth * 0.025,
+                                  color: Colors.black87,
+                                ),
+                                items:
+                                    roles
+                                        .map(
+                                          (role) => DropdownMenuItem(
+                                            value: role,
+                                            child: Text(role),
+                                          ),
+                                        )
+                                        .toList(),
+                                onChanged:
+                                    (value) => setState(() {
+                                      selectedRole = value!;
+                                    }),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: screenHeight * 0.02),
 
-                            // SPORT/SPECIALIZATION
-                            (selectedRole == 'Doctor')
-                                ? TextField(
-                                  controller: _sportController,
-                                  onTap:
-                                      () => setState(
-                                        () => _tappedFields['sport'] = true,
-                                      ),
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    labelText: "Specialization",
-                                    border: const OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _getBorderColor(
-                                          'sport',
-                                          hasText:
-                                              _sportController.text.isNotEmpty,
-                                        ),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _getBorderColor(
-                                          'sport',
-                                          hasText:
-                                              _sportController.text.isNotEmpty,
-                                        ),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    errorText:
-                                        _tappedFields['sport']!
-                                            ? _fieldErrors['sport']
-                                            : null,
+                            // Sport/Specialization Field (Signup only)
+                            if (selectedRole == 'Doctor')
+                              _buildInputField(
+                                controller: _sportController,
+                                label: "Specialization",
+                                fieldKey: 'sport',
+                                validator:
+                                    (value) => _validateSport(value ?? ''),
+                              )
+                            else
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    isSmallScreen ? 10 : 12,
                                   ),
-                                  onChanged:
-                                      (value) => _validateField('sport', value),
-                                )
-                                : DropdownButtonFormField<String>(
+                                  border: Border.all(color: Colors.grey[300]!),
+                                ),
+                                child: DropdownButtonFormField<String>(
                                   value:
                                       _sportController.text.isNotEmpty
                                           ? _sportController.text
                                           : null,
+                                  decoration: InputDecoration(
+                                    labelText: "Sport",
+                                    labelStyle: TextStyle(
+                                      fontSize:
+                                          isSmallScreen
+                                              ? screenWidth * 0.035
+                                              : isMediumScreen
+                                              ? screenWidth * 0.03
+                                              : screenWidth * 0.025,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.04,
+                                      vertical: screenHeight * 0.01,
+                                    ),
+                                  ),
+                                  style: TextStyle(
+                                    fontSize:
+                                        isSmallScreen
+                                            ? screenWidth * 0.035
+                                            : isMediumScreen
+                                            ? screenWidth * 0.03
+                                            : screenWidth * 0.025,
+                                    color: Colors.black87,
+                                  ),
                                   items:
                                       [
                                             'Football',
@@ -1838,182 +1941,233 @@ class _AuthScreenState extends State<AuthScreen> {
                                       _validateField('sport', value);
                                     });
                                   },
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    labelText: "Sport",
-                                    border: const OutlineInputBorder(),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _getBorderColor(
-                                          'sport',
-                                          hasText:
-                                              _sportController.text.isNotEmpty,
-                                        ),
-                                        width: 2,
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: _getBorderColor(
-                                          'sport',
-                                          hasText:
-                                              _sportController.text.isNotEmpty,
-                                        ),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    errorText:
-                                        _tappedFields['sport']!
-                                            ? _fieldErrors['sport']
-                                            : null,
-                                  ),
                                 ),
-                            const SizedBox(height: 12),
+                              ),
+                            SizedBox(height: screenHeight * 0.02),
                           ],
 
-                          // EMAIL
-                          TextField(
+                          // Email/Mobile Field
+                          _buildInputField(
                             controller: _emailController,
-                            onTap:
-                                () => setState(
-                                  () => _tappedFields['email'] = true,
-                                ),
-
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              labelText: "Email",
-                              border: const OutlineInputBorder(),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: _getBorderColor(
-                                    'email',
-                                    hasText: _emailController.text.isNotEmpty,
-                                  ),
-                                  width: 2,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: _getBorderColor(
-                                    'email',
-                                    hasText: _emailController.text.isNotEmpty,
-                                  ),
-                                  width: 1,
-                                ),
-                              ),
-                              errorText:
-                                  (!isLogin && _tappedFields['email']!)
-                                      ? _fieldErrors['email']
-                                      : null,
-                            ),
-                            onChanged:
-                                (value) => _validateField('email', value),
+                            label: isLogin ? "Mobile" : "Email",
+                            fieldKey: 'email',
+                            validator: (value) => _validateEmail(value ?? ''),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: screenHeight * 0.02),
 
-                          // PASSWORD
-                          TextField(
+                          // Password Field
+                          _buildInputField(
                             controller: _passwordController,
+                            label: "Password",
+                            fieldKey: 'password',
+                            validator:
+                                (value) => _validatePassword(value ?? ''),
                             obscureText: true,
-                            onTap:
-                                () => setState(
-                                  () => _tappedFields['password'] = true,
-                                ),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              labelText: "Password",
-
-                              border: const OutlineInputBorder(
-                                borderSide: BorderSide(color: Colors.white),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: _getBorderColor(
-                                    'password',
-                                    hasText:
-                                        _passwordController.text.isNotEmpty,
-                                  ),
-                                  width: 2,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: _getBorderColor(
-                                    'password',
-                                    hasText:
-                                        _passwordController.text.isNotEmpty,
-                                  ),
-                                  width: 1,
-                                ),
-                              ),
-                              errorText:
-                                  (!isLogin && _tappedFields['password']!)
-                                      ? _fieldErrors['password']
-                                      : null,
-                            ),
-                            onChanged:
-                                (value) => _validateField('password', value),
+                            suffixIcon: Icons.visibility_off,
                           ),
+
                           if (!isLogin && _tappedFields['password']!) ...[
-                            const SizedBox(height: 12),
+                            SizedBox(height: screenHeight * 0.02),
                             _buildPasswordChecklist(),
                           ],
-                          const SizedBox(height: 20),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              gradient: LinearGradient(
-                                colors: [Color(0xff006EFF), Color(0xff00ccff)],
-                              ),
-                            ),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
+
+                          if (isLogin) ...[
+                            SizedBox(height: screenHeight * 0.005),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  // Handle forgot password
+                                },
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize:
+                                        isSmallScreen
+                                            ? screenWidth * 0.03
+                                            : isMediumScreen
+                                            ? screenWidth * 0.025
+                                            : screenWidth * 0.02,
                                   ),
                                 ),
-                                onPressed: isLoading ? null : handleAuth,
-                                child:
-                                    isLoading
-                                        ? const SizedBox(
-                                          height: 20,
-                                          width: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  Colors.white,
-                                                ),
-                                          ),
-                                        )
-                                        : Text(
-                                          isLogin ? "Login" : "Signup",
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.white,
-                                          ),
-                                        ),
                               ),
                             ),
+                          ],
+
+                          SizedBox(height: screenHeight * 0.02),
+
+                          // Login/Signup Button - Responsive
+                          Container(
+                            width: double.infinity,
+                            height:
+                                isSmallScreen
+                                    ? screenHeight * 0.06
+                                    : isMediumScreen
+                                    ? screenHeight * 0.065
+                                    : screenHeight * 0.07,
+                            child: ElevatedButton(
+                              onPressed: isLoading ? null : handleAuth,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFF6B6B),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    isSmallScreen ? 10 : 12,
+                                  ),
+                                ),
+                                elevation: 0,
+                              ),
+                              child:
+                                  isLoading
+                                      ? SizedBox(
+                                        height: isSmallScreen ? 18 : 20,
+                                        width: isSmallScreen ? 18 : 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                      : Text(
+                                        isLogin ? "Login" : "Signup",
+                                        style: TextStyle(
+                                          fontSize:
+                                              isSmallScreen
+                                                  ? screenWidth * 0.04
+                                                  : isMediumScreen
+                                                  ? screenWidth * 0.035
+                                                  : screenWidth * 0.03,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                            ),
+                          ),
+
+                          SizedBox(
+                            height:
+                                screenHeight * (isSmallScreen ? 0.025 : 0.03),
+                          ),
+
+                          // Toggle Login/Signup - Responsive
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isLogin
+                                    ? 'New user? '
+                                    : 'Already have an account? ',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize:
+                                      isSmallScreen
+                                          ? screenWidth * 0.03
+                                          : isMediumScreen
+                                          ? screenWidth * 0.025
+                                          : screenWidth * 0.02,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => toggle(!isLogin),
+                                child: Text(
+                                  isLogin ? 'Signup' : 'Login',
+                                  style: TextStyle(
+                                    color: const Color(0xFFFF6B6B),
+                                    fontSize:
+                                        isSmallScreen
+                                            ? screenWidth * 0.03
+                                            : isMediumScreen
+                                            ? screenWidth * 0.025
+                                            : screenWidth * 0.02,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required String fieldKey,
+    required String? Function(String?) validator,
+    bool obscureText = false,
+    IconData? suffixIcon,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(isSmallScreen ? 10 : 12),
+        border: Border.all(
+          color: _getBorderColor(fieldKey, hasText: controller.text.isNotEmpty),
+          width: 1.5,
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: obscureText,
+        onTap: () => setState(() => _tappedFields[fieldKey] = true),
+        onChanged: (value) => _validateField(fieldKey, value),
+        style: TextStyle(
+          fontSize:
+              isSmallScreen
+                  ? screenWidth * 0.035
+                  : isMediumScreen
+                  ? screenWidth * 0.03
+                  : screenWidth * 0.025,
+          color: Colors.black87,
+        ),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Colors.grey[600],
+            fontSize:
+                isSmallScreen
+                    ? screenWidth * 0.035
+                    : isMediumScreen
+                    ? screenWidth * 0.03
+                    : screenWidth * 0.025,
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.04,
+            vertical: screenHeight * 0.005,
+          ),
+          suffixIcon:
+              suffixIcon != null
+                  ? Icon(
+                    suffixIcon,
+                    color: Colors.grey[600],
+                    size:
+                        isSmallScreen
+                            ? screenWidth * 0.045
+                            : isMediumScreen
+                            ? screenWidth * 0.04
+                            : screenWidth * 0.035,
+                  )
+                  : null,
+          errorText:
+              (!isLogin && _tappedFields[fieldKey]!)
+                  ? _fieldErrors[fieldKey]
+                  : null,
+          errorStyle: TextStyle(fontSize: isSmallScreen ? 10 : 12),
+        ),
       ),
     );
   }

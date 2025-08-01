@@ -56,6 +56,7 @@ class _AuthScreenState extends State<AuthScreen> {
     'sport': false,
     'dob': false,
   };
+
   final Map<String, String?> _fieldErrors = {
     'email': null,
     'password': null,
@@ -114,7 +115,6 @@ class _AuthScreenState extends State<AuthScreen> {
     if (user != null) {
       // User is signed in, check if user data exists in Firestore first
       final userDoc = await _firestore.collection('users').doc(user.uid).get();
-
       if (!userDoc.exists) {
         // User data doesn't exist in Firestore, sign out
         await _auth.signOut();
@@ -123,7 +123,6 @@ class _AuthScreenState extends State<AuthScreen> {
       }
 
       final userData = userDoc.data()!;
-
       // Check Firestore emailVerified status first (this allows manual override)
       bool isEmailVerifiedInFirestore = userData['emailVerified'] == true;
 
@@ -137,7 +136,6 @@ class _AuthScreenState extends State<AuthScreen> {
       // For other roles, check both Firebase Auth and Firestore
       await user.reload();
       final refreshedUser = _auth.currentUser;
-
       if (refreshedUser != null &&
           (refreshedUser.emailVerified || isEmailVerifiedInFirestore)) {
         // Either Firebase Auth or Firestore shows verified status
@@ -202,8 +200,6 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   /// Updates the email verification status in Firestore.
-  Future<void> _updateEmailVerificationStatus(String uid, bool isVerified) async {
-  // Update email verification status in Firestore
   Future<void> _updateEmailVerificationStatus(
     String uid,
     bool isVerified,
@@ -222,7 +218,6 @@ class _AuthScreenState extends State<AuthScreen> {
               .where('email', isEqualTo: email)
               .limit(1)
               .get();
-
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.data();
       }
@@ -244,16 +239,12 @@ class _AuthScreenState extends State<AuthScreen> {
           timer.cancel();
           return;
         }
-
         await user.reload();
         final refreshedUser = _auth.currentUser;
-
         if (refreshedUser != null && refreshedUser.emailVerified) {
           timer.cancel();
-
           // Update verification status in Firestore
           await _updateEmailVerificationStatus(refreshedUser.uid, true);
-
           if (mounted) {
             setState(() {
               isEmailVerificationPending = false;
@@ -272,7 +263,6 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _proceedAfterVerification(User user) async {
     try {
       setState(() => isLoading = true);
-
       // Navigate to appropriate dashboard
       await _navigateBasedOnRole(user.uid);
     } catch (e) {
@@ -296,7 +286,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
       final role = data['role'] as String;
       Widget targetScreen;
-
       switch (role) {
         case 'Athlete':
           targetScreen = const DashboardScreen();
@@ -315,7 +304,6 @@ class _AuthScreenState extends State<AuthScreen> {
       }
 
       await saveFcmToken();
-
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -355,15 +343,12 @@ class _AuthScreenState extends State<AuthScreen> {
   /// FIXED: Resend verification email (keep user signed in).
   Future<void> _resendVerificationEmail() async {
     if (isResendingEmail) return;
-
     setState(() => isResendingEmail = true);
-
     try {
       final user = _auth.currentUser;
       if (user != null) {
         await user.reload();
         final refreshedUser = _auth.currentUser;
-
         if (refreshedUser != null && !refreshedUser.emailVerified) {
           await refreshedUser.sendEmailVerification();
           if (mounted) {
@@ -405,7 +390,6 @@ class _AuthScreenState extends State<AuthScreen> {
           errorMessage =
               'Network error. Please check your connection and try again.';
         }
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
@@ -468,7 +452,6 @@ class _AuthScreenState extends State<AuthScreen> {
   /// FIXED: Resend verification email for login attempts.
   Future<void> _resendVerificationEmailForLogin(String email) async {
     setState(() => isResendingEmail = true);
-
     try {
       // Get user data from Firestore to verify they exist
       final userData = await _getUserData(email);
@@ -498,7 +481,6 @@ class _AuthScreenState extends State<AuthScreen> {
   /// Show password dialog for resending verification email.
   void _showPasswordForResendDialog(String email) {
     final passwordController = TextEditingController();
-
     showDialog(
       context: context,
       builder:
@@ -534,18 +516,15 @@ class _AuthScreenState extends State<AuthScreen> {
                   try {
                     Navigator.of(context).pop();
                     setState(() => isResendingEmail = true);
-
                     // Sign in to send verification email
                     UserCredential userCredential = await _auth
                         .signInWithEmailAndPassword(
                           email: email,
                           password: passwordController.text,
                         );
-
                     if (!userCredential.user!.emailVerified) {
                       await userCredential.user!.sendEmailVerification();
                       // Keep user signed in for verification checking
-
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -574,7 +553,6 @@ class _AuthScreenState extends State<AuthScreen> {
                         errorMessage =
                             'Too many attempts. Please try again later.';
                       }
-
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(errorMessage),
@@ -616,7 +594,6 @@ class _AuthScreenState extends State<AuthScreen> {
       hasLowercase = RegExp(r'(?=.*[a-z])').hasMatch(password);
       hasNumber = RegExp(r'(?=.*\d)').hasMatch(password);
       hasMinLength = password.length >= 8;
-
       if (password.isEmpty && (forceValidate || _tappedFields['password']!)) {
         return "Password is required";
       } else if (password.isNotEmpty) {
@@ -718,7 +695,6 @@ class _AuthScreenState extends State<AuthScreen> {
   /// Main authentication handler.
   Future<void> handleAuth() async {
     if (isLoading) return;
-
     // Mark all relevant fields as tapped and validate
     setState(() {
       _tappedFields['email'] = true;
@@ -731,7 +707,6 @@ class _AuthScreenState extends State<AuthScreen> {
         _passwordController.text,
         forceValidate: true,
       );
-
       if (!isLogin) {
         _tappedFields['name'] = true;
         _tappedFields['sport'] = true;
@@ -753,7 +728,6 @@ class _AuthScreenState extends State<AuthScreen> {
         isLogin
             ? [_fieldErrors['email'], _fieldErrors['password']]
             : _fieldErrors.values;
-
     final errors = activeErrors.where((error) => error != null).toList();
     if (errors.isNotEmpty) {
       if (mounted) {
@@ -765,7 +739,6 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
     setState(() => isLoading = true);
-
     try {
       if (isLogin) {
         await _handleLogin();
@@ -786,7 +759,6 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _handleLogin() async {
     try {
       final email = _emailController.text.trim();
-
       // First, try to sign in to get the most up-to-date user information
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -799,7 +771,6 @@ class _AuthScreenState extends State<AuthScreen> {
               .collection('users')
               .doc(userCredential.user!.uid)
               .get();
-
       if (!userDoc.exists) {
         await _auth.signOut();
         throw Exception('User data not found');
@@ -818,7 +789,6 @@ class _AuthScreenState extends State<AuthScreen> {
       // For other roles, check Firebase Auth verification
       await userCredential.user!.reload();
       final refreshedUser = _auth.currentUser;
-
       if (refreshedUser == null) {
         throw Exception('User not found after login');
       }
@@ -863,7 +833,6 @@ class _AuthScreenState extends State<AuthScreen> {
           errorMessage =
               e.message ?? "An unknown error occurred. Please try again.";
       }
-
       if (mounted) {
         showDialog(
           context: context,
@@ -887,22 +856,18 @@ class _AuthScreenState extends State<AuthScreen> {
   Future<void> _handleSignup() async {
     try {
       final email = _emailController.text.trim();
-
       // Check if user already exists
       List<String> signInMethods = await _auth.fetchSignInMethodsForEmail(
         email,
       );
-
       if (signInMethods.isNotEmpty) {
         setState(() => isLoading = false);
-
         // Check if this user exists in our Firestore and is unverified
         final userData = await _getUserData(email);
         if (userData != null && userData['emailVerified'] == false) {
           _showExistingUnverifiedUserDialog(email);
           return;
         }
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -963,7 +928,6 @@ class _AuthScreenState extends State<AuthScreen> {
           errorMessage =
               e.message ?? "An unknown error occurred. Please try again.";
       }
-
       if (mounted) {
         showDialog(
           context: context,
@@ -983,7 +947,7 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show dialog for existing unverified users during signup
+  /// Show dialog for existing unverified users during signup.
   void _showExistingUnverifiedUserDialog(String email) {
     showDialog(
       context: context,
@@ -1042,7 +1006,6 @@ class _AuthScreenState extends State<AuthScreen> {
   /// FIXED: Resend verification email for signup attempts with existing unverified users.
   Future<void> _resendVerificationForSignup(String email) async {
     setState(() => isResendingEmail = true);
-
     try {
       // We need to sign in the user temporarily to send verification email
       _showPasswordForResendSignupDialog(email);
@@ -1060,7 +1023,6 @@ class _AuthScreenState extends State<AuthScreen> {
   /// Show password dialog for resending verification email during signup.
   void _showPasswordForResendSignupDialog(String email) {
     final passwordController = TextEditingController();
-
     showDialog(
       context: context,
       builder:
@@ -1096,25 +1058,20 @@ class _AuthScreenState extends State<AuthScreen> {
                   try {
                     Navigator.of(context).pop();
                     setState(() => isResendingEmail = true);
-
                     // Sign in to send verification email
                     UserCredential userCredential = await _auth
                         .signInWithEmailAndPassword(
                           email: email,
                           password: passwordController.text,
                         );
-
                     if (!userCredential.user!.emailVerified) {
                       await userCredential.user!.sendEmailVerification();
-
                       // Go to verification pending screen and start checking
                       setState(() {
                         isEmailVerificationPending = true;
                         pendingVerificationEmail = email;
                       });
-
                       _startEmailVerificationCheck();
-
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -1153,32 +1110,26 @@ class _AuthScreenState extends State<AuthScreen> {
   /// Saves the Firebase Cloud Messaging (FCM) token to the user's document in Firestore.
   Future<void> saveFcmToken() async {
     await FirebaseMessaging.instance.requestPermission();
-
     final token = await FirebaseMessaging.instance.getToken();
     debugPrint('FCM Token: $token');
-
     if (token == null) {
       debugPrint('Failed to get FCM token');
       return;
     }
-
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       debugPrint('No user logged in');
       return;
     }
-
     await FirebaseFirestore.instance.collection('users').doc(uid).set({
       'fcmToken': token,
     }, SetOptions(merge: true));
-
     debugPrint('FCM Token saved to Firestore');
   }
 
   /// Password checklist widget.
   Widget _buildPasswordChecklist() {
     final screenWidth = MediaQuery.of(context).size.width;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1198,24 +1149,6 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  /// Helper method to build a single checklist item.
-  Widget _buildChecklistItem(String text, bool isValid) {
-    return Row(
-      children: [
-        Icon(
-          isValid ? Icons.check_circle : Icons.cancel,
-          color: isValid ? Colors.green : Colors.red,
-          size: 20,
-        ),
-        const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            color: isValid ? Colors.green : Colors.red,
-            fontSize: 14,
-          ),
-        ),
-      ],
   Widget _buildChecklistItem(String text, bool isValid, double screenWidth) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: screenWidth * 0.005),
@@ -1251,12 +1184,10 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  /// FIXED: Email verification pending widget - fixed overflow issue.
-  // FIXED: Email verification pending widget - fully responsive
+  /// FIXED: Email verification pending widget - fully responsive.
   Widget _buildEmailVerificationPending() {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(
@@ -1349,19 +1280,19 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                     icon:
                         isResendingEmail
-                            ? SizedBox(
+                            ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                            : Icon(Icons.refresh),
+                            : const Icon(Icons.refresh),
                     label: Text(
                       isResendingEmail ? 'Sending...' : 'Resend Email',
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -1373,27 +1304,27 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                     icon:
                         isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                            : Icon(Icons.check),
+                            : const Icon(Icons.check),
                     label: Text(
                       isLoading ? 'Checking...' : 'I\'ve Verified',
-                      style: TextStyle(fontSize: 12),
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton.icon(
                   onPressed:
                       () => setState(() {
                         isEmailVerificationPending = false;
                         _emailVerificationTimer?.cancel();
                       }),
-                  icon: Icon(Icons.arrow_back),
-                  label: Text('Go Back', style: TextStyle(fontSize: 12)),
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Go Back', style: TextStyle(fontSize: 12)),
                 ),
               ],
             ),
@@ -1411,19 +1342,19 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                     icon:
                         isResendingEmail
-                            ? SizedBox(
+                            ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                            : Icon(Icons.refresh),
+                            : const Icon(Icons.refresh),
                     label: Text(
                       isResendingEmail ? 'Sending...' : 'Resend Email',
                       style: TextStyle(fontSize: isMediumScreen ? 12 : 14),
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed:
@@ -1434,12 +1365,12 @@ class _AuthScreenState extends State<AuthScreen> {
                             },
                     icon:
                         isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                            : Icon(Icons.check),
+                            : const Icon(Icons.check),
                     label: Text(
                       isLoading ? 'Checking...' : 'I\'ve Verified',
                       style: TextStyle(fontSize: isMediumScreen ? 12 : 14),
@@ -1448,14 +1379,14 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextButton.icon(
               onPressed:
                   () => setState(() {
                     isEmailVerificationPending = false;
                     _emailVerificationTimer?.cancel();
                   }),
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               label: Text(
                 'Go Back',
                 style: TextStyle(fontSize: isMediumScreen ? 12 : 14),
@@ -1467,18 +1398,15 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  // FIXED: Resend verification email when user is on pending screen
+  /// FIXED: Resend verification email when user is on pending screen.
   Future<void> _resendVerificationEmailForPending() async {
     if (isResendingEmail) return;
-
     setState(() => isResendingEmail = true);
-
     try {
       final user = _auth.currentUser;
       if (user != null) {
         await user.reload();
         final refreshedUser = _auth.currentUser;
-
         if (refreshedUser != null && !refreshedUser.emailVerified) {
           await refreshedUser.sendEmailVerification();
           if (mounted) {
@@ -1521,28 +1449,23 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // FIXED: Manual verification check when user clicks "I've Verified"
+  /// FIXED: Manual verification check when user clicks "I've Verified".
   Future<void> _checkVerificationManually() async {
     if (isLoading) return;
-
     setState(() => isLoading = true);
-
     try {
       final user = _auth.currentUser;
       if (user != null) {
         // User is signed in, check verification directly
         await user.reload();
         final refreshedUser = _auth.currentUser;
-
         if (refreshedUser != null && refreshedUser.emailVerified) {
           // Email is verified, update Firestore and navigate
           await _updateEmailVerificationStatus(refreshedUser.uid, true);
-
           setState(() {
             isEmailVerificationPending = false;
             isLoading = false;
           });
-
           await _navigateBasedOnRole(refreshedUser.uid);
         } else {
           // Still not verified
@@ -1574,10 +1497,9 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  // Show password dialog for manual verification check
+  /// Show password dialog for manual verification check.
   void _showPasswordForVerificationCheckDialog(String email) {
     final passwordController = TextEditingController();
-
     showDialog(
       context: context,
       builder:
@@ -1613,35 +1535,29 @@ class _AuthScreenState extends State<AuthScreen> {
                 onPressed: () async {
                   try {
                     Navigator.of(context).pop();
-
                     // Sign in to check verification status
                     UserCredential userCredential = await _auth
                         .signInWithEmailAndPassword(
                           email: email,
                           password: passwordController.text,
                         );
-
                     // Reload user to get latest verification status
                     await userCredential.user!.reload();
                     final refreshedUser = _auth.currentUser;
-
                     if (refreshedUser != null && refreshedUser.emailVerified) {
                       // Email is verified, update Firestore and navigate
                       await _updateEmailVerificationStatus(
                         refreshedUser.uid,
                         true,
                       );
-
                       setState(() {
                         isEmailVerificationPending = false;
                         isLoading = false;
                       });
-
                       await _navigateBasedOnRole(refreshedUser.uid);
                     } else {
                       // Still not verified
                       setState(() => isLoading = false);
-
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -1663,7 +1579,6 @@ class _AuthScreenState extends State<AuthScreen> {
                         errorMessage =
                             'Too many attempts. Please try again later.';
                       }
-
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(errorMessage),
@@ -1711,16 +1626,14 @@ class _AuthScreenState extends State<AuthScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Image(
-                        image: AssetImage("assets/logo_png.png"),
+                        image: const AssetImage("assets/logo_png.png"),
                         width: screenWidth * 0.15,
                       ),
                     ],
                   ),
-
                   SizedBox(
                     height: screenHeight * (isSmallScreen ? 0.03 : 0.04),
                   ),
-
                   if (isEmailVerificationPending) ...[
                     _buildEmailVerificationPending(),
                   ] else ...[
@@ -1744,7 +1657,6 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       ],
                     ),
-
                     SizedBox(height: screenHeight * 0.01),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -1766,11 +1678,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       ],
                     ),
-
                     SizedBox(
                       height: screenHeight * (isSmallScreen ? 0.04 : 0.05),
                     ),
-
                     // Main Form Container - Responsive
                     Container(
                       width: double.infinity,
@@ -1806,7 +1716,6 @@ class _AuthScreenState extends State<AuthScreen> {
                               validator: (value) => _validateName(value ?? ''),
                             ),
                             SizedBox(height: screenHeight * 0.02),
-
                             // Date of Birth Field (Signup only)
                             GestureDetector(
                               onTap: () async {
@@ -1837,7 +1746,6 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                             SizedBox(height: screenHeight * 0.02),
-
                             // Role Dropdown (Signup only) - Responsive
                             Container(
                               decoration: BoxDecoration(
@@ -1889,7 +1797,6 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                             SizedBox(height: screenHeight * 0.02),
-
                             // Sport/Specialization Field (Signup only)
                             if (selectedRole == 'Doctor')
                               _buildInputField(
@@ -1964,7 +1871,6 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             SizedBox(height: screenHeight * 0.02),
                           ],
-
                           // Email/Mobile Field
                           _buildInputField(
                             controller: _emailController,
@@ -1973,7 +1879,6 @@ class _AuthScreenState extends State<AuthScreen> {
                             validator: (value) => _validateEmail(value ?? ''),
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           // Password Field
                           _buildInputField(
                             controller: _passwordController,
@@ -1984,12 +1889,10 @@ class _AuthScreenState extends State<AuthScreen> {
                             obscureText: true,
                             suffixIcon: Icons.visibility_off,
                           ),
-
                           if (!isLogin && _tappedFields['password']!) ...[
                             SizedBox(height: screenHeight * 0.02),
                             _buildPasswordChecklist(),
                           ],
-
                           if (isLogin) ...[
                             SizedBox(height: screenHeight * 0.005),
                             Align(
@@ -2013,9 +1916,7 @@ class _AuthScreenState extends State<AuthScreen> {
                               ),
                             ),
                           ],
-
                           SizedBox(height: screenHeight * 0.02),
-
                           // Login/Signup Button - Responsive
                           Container(
                             width: double.infinity,
@@ -2041,7 +1942,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                       ? SizedBox(
                                         height: isSmallScreen ? 18 : 20,
                                         width: isSmallScreen ? 18 : 20,
-                                        child: CircularProgressIndicator(
+                                        child: const CircularProgressIndicator(
                                           strokeWidth: 2,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
@@ -2064,12 +1965,10 @@ class _AuthScreenState extends State<AuthScreen> {
                                       ),
                             ),
                           ),
-
                           SizedBox(
                             height:
                                 screenHeight * (isSmallScreen ? 0.025 : 0.03),
                           ),
-
                           // Toggle Login/Signup - Responsive
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,

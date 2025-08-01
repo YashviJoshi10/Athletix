@@ -1678,33 +1678,14 @@ class _AuthScreenState extends State<AuthScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Basketball Logo - Responsive
-                  Container(
-                    width:
-                        isSmallScreen
-                            ? 60
-                            : isMediumScreen
-                            ? 70
-                            : 80,
-                    height:
-                        isSmallScreen
-                            ? 60
-                            : isMediumScreen
-                            ? 70
-                            : 80,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFF6B6B),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.sports_basketball,
-                      color: Colors.white,
-                      size:
-                          isSmallScreen
-                              ? 30
-                              : isMediumScreen
-                              ? 35
-                              : 40,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Image(
+                        image: AssetImage("assets/logo_png.png"),
+                        width: screenWidth * 0.15,
+                      ),
+                    ],
                   ),
 
                   SizedBox(
@@ -1715,37 +1696,46 @@ class _AuthScreenState extends State<AuthScreen> {
                     _buildEmailVerificationPending(),
                   ] else ...[
                     // Welcome Text - Responsive
-                    Text(
-                      isLogin ? 'Welcome Back,' : 'Create Account,',
-                      style: TextStyle(
-                        fontSize:
-                            isSmallScreen
-                                ? screenWidth * 0.07
-                                : isMediumScreen
-                                ? screenWidth * 0.06
-                                : screenWidth * 0.05,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          isLogin ? 'Welcome Back,' : 'Create Account,',
+                          style: TextStyle(
+                            fontSize:
+                                isSmallScreen
+                                    ? screenWidth * 0.07
+                                    : isMediumScreen
+                                    ? screenWidth * 0.06
+                                    : screenWidth * 0.05,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
 
                     SizedBox(height: screenHeight * 0.01),
-
-                    Text(
-                      isLogin
-                          ? 'Sign in to continue'
-                          : 'Sign up to get started',
-                      style: TextStyle(
-                        fontSize:
-                            isSmallScreen
-                                ? screenWidth * 0.035
-                                : isMediumScreen
-                                ? screenWidth * 0.03
-                                : screenWidth * 0.025,
-                        color: Colors.grey[600],
-                      ),
-                      textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          isLogin
+                              ? 'Sign in to continue'
+                              : 'Sign up to get started',
+                          style: TextStyle(
+                            fontSize:
+                                isSmallScreen
+                                    ? screenWidth * 0.035
+                                    : isMediumScreen
+                                    ? screenWidth * 0.03
+                                    : screenWidth * 0.025,
+                            color: Colors.grey[600],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
 
                     SizedBox(
@@ -2147,7 +2137,7 @@ class _AuthScreenState extends State<AuthScreen> {
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
             horizontal: screenWidth * 0.04,
-            vertical: screenHeight * 0.005,
+            vertical: screenHeight * 0.001,
           ),
           suffixIcon:
               suffixIcon != null

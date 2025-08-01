@@ -1939,7 +1939,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           // Email/Mobile Field
                           _buildInputField(
                             controller: _emailController,
-                            label: isLogin ? "Mobile" : "Email",
+                            label: "Email",
                             fieldKey: 'email',
                             validator: (value) => _validateEmail(value ?? ''),
                           ),

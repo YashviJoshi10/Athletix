@@ -1,8 +1,11 @@
+
+# Don't forget to star our repository
+
 # 🏋️ Athletix
 
 **Athletix** is a Flutter-based mobile application designed to streamline collaboration between athletes, coaches, doctors, and sports organizations. It offers a centralized platform to manage tournaments, track performance and injuries, maintain schedules, and facilitate communication while respecting user roles.
 
-## ⭐ Don't forget to star our repository
+---
 
 ## 🚀 Features
 
@@ -54,7 +57,6 @@
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install)
 - [Git](https://git-scm.com/downloads)
-- [Firebase CLI](https://firebase.google.com/docs/cli) – `npm install -g firebase-tools`
 - A physical Android device (recommended)
 
 ---
@@ -79,21 +81,6 @@ flutter run
 ```
 
 > 📱 **Tip**: It's recommended to use a physical Android device for better performance during development.
-
----
-
-### 🔥 Firebase Setup
-
-1. Go to the [Firebase Console](https://console.firebase.google.com)
-2. Create a new Firebase project
-3. Register your **Android** and/or **iOS** app
-4. Download the `google-services.json` file
-5. Place the file in:  
-   `Athletix/android/app/`
-6. Enable the following Firebase services:
-   - ✅ **Authentication** (Email/Password)
-   - ✅ **Firestore Database**
-   - ✅ **Firebase Cloud Messaging (FCM)**
 
 ---
 
@@ -162,6 +149,34 @@ Athletix/
 
 ---
 
+## 🧪 How to Run Tests
+
+To run the Flutter tests:
+
+```bash
+flutter test
+```
+
+This will execute all unit and widget tests in the `test/` directory.
+
+---
+
+## 🤝 How to Contribute
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started, report issues, or submit pull requests.
+
+---
+
+## 📫 Contact / Support
+
+For questions, suggestions, or support, please open an issue on GitHub or contact the maintainers via the repository.
+
 ## 📜 License
 
 This project is licensed under the **MIT License**
+
+<p align="center">
+  <a href="#top" style="font-size: 18px; padding: 8px 16px; display: inline-block; border: 1px solid #ccc; border-radius: 6px; text-decoration: none;">
+    ⬆️ Back to Top
+  </a>
+</p>

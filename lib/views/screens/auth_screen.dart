@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/auth_state.dart';
-import '../viewmodels/auth_viewmodel.dart';
-import '../views/widgets/auth_form.dart';
-import '../views/widgets/email_verification_pending.dart';
-import '../views/widgets/responsive_helper.dart';
+import 'package:athletix/models/auth_state.dart';
+import 'package:athletix/viewmodels/auth_viewmodel.dart';
+import 'package:athletix/views/widgets/auth_form.dart';
+import 'package:athletix/views/widgets/email_verification_pending.dart';
+import 'package:athletix/views/widgets/responsive_helper.dart';
 import 'athlete/athlete_dashboard.dart';
-import 'coach/coach_dashboard.dart';
-import 'doctor/doctor_dashboard.dart';
-import 'organization/organization_dashboard.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});

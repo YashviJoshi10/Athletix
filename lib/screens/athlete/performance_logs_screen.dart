@@ -33,8 +33,8 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen> {
       'uid': uid,
       'activity': _activityController.text.trim(),
       'notes': _notesController.text.trim(),
-      'date': Timestamp.fromDate(_logDate!), // ✅ store as Timestamp
-      'createdAt': FieldValue.serverTimestamp(), // ✅ server time
+      'date': Timestamp.fromDate(_logDate!), // store as Timestamp
+      'createdAt': FieldValue.serverTimestamp(), // server time
     });
 
     _activityController.clear();
@@ -94,7 +94,7 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen> {
               TextField(
                 controller: _notesController,
                 decoration:
-                const InputDecoration(labelText: "Notes (optional)"),
+                    const InputDecoration(labelText: "Notes (optional)"),
                 maxLines: 2,
               ),
             ],
@@ -154,17 +154,18 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen> {
             return const Center(child: Text("No performance logs yet."));
           }
 
+          // FIXED: Only one definition of 'docs'
           final docs = snapshot.data!.docs;
 
-          // 🔁 Build chart data list
+          // Build chart data
           final List<Map<String, dynamic>> logsForChart = docs.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
             return {
               'activity': data['activity'],
               'notes': data['notes'],
               'date': (data['date'] as Timestamp).toDate(),
-              'calories': 100, // Optional: make dynamic later
-              'duration': 30,  // Optional: make dynamic later
+              'calories': 100,
+              'duration': 30,
             };
           }).toList();
 
@@ -220,5 +221,5 @@ class _PerformanceLogScreenState extends State<PerformanceLogScreen> {
         },
       ),
     );
-  },
+  }
 }

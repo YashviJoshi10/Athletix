@@ -149,6 +149,34 @@ Athletix/
 
 ---
 
+## 🧪 How to Run Tests
+
+To run the Flutter tests:
+
+```bash
+flutter test
+```
+
+This will execute all unit and widget tests in the `test/` directory.
+
+---
+
+## 🤝 How to Contribute
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started, report issues, or submit pull requests.
+
+---
+
+## 📫 Contact / Support
+
+For questions, suggestions, or support, please open an issue on GitHub or contact the maintainers via the repository.
+
 ## 📜 License
 
 This project is licensed under the **MIT License**
+
+<p align="center">
+  <a href="#top" style="font-size: 18px; padding: 8px 16px; display: inline-block; border: 1px solid #ccc; border-radius: 6px; text-decoration: none;">
+    ⬆️ Back to Top
+  </a>
+</p>
